@@ -9,6 +9,8 @@ import { RideStatusBadge } from '../../components/RideStatusBadge';
 import { RatingModal } from '../../components/RatingModal';
 import { SafetyModal } from '../../components/SafetyModal';
 import { RydoAIAssistant } from '../../components/ai/RydoAIAssistant';
+import { LocationSearchInput } from '../../components/location/LocationSearchInput';
+import { reverseGeocode, searchLocations } from '../../services/geocoding';
 import { Ride, FareEstimateResponse } from '../../types';
 import { 
   MapPin, 
@@ -33,11 +35,11 @@ import {
 const VehiclePreviewCanvas = lazy(() => import('../../components/3d/VehiclePreviewCanvas'));
 
 const PRESET_HUBS = [
-  { name: 'Union Square', address: 'Union Square, SF', lat: 37.7879, lng: -122.4074 },
-  { name: 'SFO Airport', address: 'San Francisco Int Airport (SFO)', lat: 37.6213, lng: -122.3790 },
-  { name: 'Salesforce Tower', address: '415 Mission St, SF', lat: 37.7897, lng: -122.3972 },
-  { name: 'Fisherman\'s Wharf', address: 'Beach St & The Embarcadero, SF', lat: 37.8080, lng: -122.4177 },
-  { name: 'Golden Gate Park', address: 'Golden Gate Park Music Concourse', lat: 37.7694, lng: -122.4862 },
+  { name: 'CSMIA Airport', address: 'Chhatrapati Shivaji Maharaj Int Airport, Mumbai', lat: 19.0901, lng: 72.8638 },
+  { name: 'BKC Business Hub', address: 'Bandra Kurla Complex, G Block, Mumbai', lat: 19.0664, lng: 72.8679 },
+  { name: 'Marine Drive', address: 'Marine Drive Promenade, Nariman Point, Mumbai', lat: 18.9438, lng: 72.8232 },
+  { name: 'Gateway of India', address: 'Apollo Bandar, Colaba, Mumbai', lat: 18.9220, lng: 72.8346 },
+  { name: 'Powai Tech City', address: 'Hiranandani Business Park, Powai, Mumbai', lat: 19.1197, lng: 72.9056 },
 ];
 
 interface PassengerDashboardProps {
@@ -209,15 +211,36 @@ export const PassengerDashboard: React.FC<PassengerDashboardProps> = ({
     };
   }, [subscribe]);
 
-  // Map Click handler
-  const handleMapLocationSelect = (coords: { lat: number; lng: number }) => {
-    const addr = `Custom Coordinates (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`;
-    if (selectionMode === 'pickup') {
-      setPickup({ ...coords, address: addr });
-      setSelectionMode(null);
-    } else if (selectionMode === 'dropoff') {
-      setDropoff({ ...coords, address: addr });
-      setSelectionMode(null);
+  // Map Click handler with Reverse Geocoding
+  const handleMapLocationSelect = async (coords: { lat: number; lng: number }) => {
+    const fallbackAddr = `Pinned (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`;
+    const mode = selectionMode;
+    setSelectionMode(null);
+
+    if (mode === 'pickup') {
+      setPickup({ ...coords, address: fallbackAddr });
+      try {
+        const details = await reverseGeocode(coords.lat, coords.lng);
+        setPickup({
+          lat: coords.lat,
+          lng: coords.lng,
+          address: details.placeName || details.formattedAddress || fallbackAddr,
+        });
+      } catch (e) {
+        // keep fallback
+      }
+    } else if (mode === 'dropoff') {
+      setDropoff({ ...coords, address: fallbackAddr });
+      try {
+        const details = await reverseGeocode(coords.lat, coords.lng);
+        setDropoff({
+          lat: coords.lat,
+          lng: coords.lng,
+          address: details.placeName || details.formattedAddress || fallbackAddr,
+        });
+      } catch (e) {
+        // keep fallback
+      }
     }
   };
 
@@ -313,12 +336,25 @@ export const PassengerDashboard: React.FC<PassengerDashboardProps> = ({
       {/* VIEW: RYDO AI ASSISTANT */}
       {effectiveTab === 'ai' && (
         <RydoAIAssistant 
-          onQuickBook={(destination) => {
+          onQuickBook={async (destination) => {
             const foundHub = PRESET_HUBS.find(h => h.name.toLowerCase().includes(destination.toLowerCase()));
             if (foundHub) {
               setDropoff(foundHub);
             } else {
-              setDropoff({ lat: 37.6213, lng: -122.3790, address: destination });
+              try {
+                const results = await searchLocations(destination);
+                if (results.length > 0) {
+                  setDropoff({
+                    lat: results[0].latitude,
+                    lng: results[0].longitude,
+                    address: results[0].placeName || results[0].formattedAddress
+                  });
+                } else {
+                  setDropoff({ lat: 19.0901, lng: 72.8638, address: destination });
+                }
+              } catch (e) {
+                setDropoff({ lat: 19.0901, lng: 72.8638, address: destination });
+              }
             }
             handleTabSwitch('book');
           }}
@@ -669,60 +705,48 @@ export const PassengerDashboard: React.FC<PassengerDashboardProps> = ({
                   </div>
 
                   {/* Location Inputs */}
-                  <div className="space-y-2.5">
-                    {/* Pickup */}
-                    <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                        Pickup Location
-                      </label>
-                      <div className="relative flex items-center">
-                        <div className="w-2.5 h-2.5 rounded-full bg-electric-500 absolute left-3" />
-                        <input
-                          type="text"
-                          value={pickup.address}
-                          onChange={(e) => setPickup({ ...pickup, address: e.target.value })}
-                          className="w-full bg-pearl-100/70 border border-slate-200 rounded-2xl pl-8 pr-24 py-2.5 text-xs text-navy-900 placeholder-slate-400 focus:outline-none focus:border-electric-500 focus:bg-white transition"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setSelectionMode(selectionMode === 'pickup' ? null : 'pickup')}
-                          className={`absolute right-2 px-2.5 py-1 rounded-xl text-[10px] font-bold border transition cursor-pointer ${
-                            selectionMode === 'pickup'
-                              ? 'bg-electric-500 text-white border-electric-500'
-                              : 'bg-white text-navy-900 border-slate-200 hover:bg-pearl-100'
-                          }`}
-                        >
-                          {selectionMode === 'pickup' ? 'Cancel' : 'Pick on Map'}
-                        </button>
-                      </div>
-                    </div>
+                  <div className="space-y-3">
+                    {/* Pickup Location Search Input */}
+                    <LocationSearchInput
+                      label="Pickup Location"
+                      placeholder="Enter pickup location"
+                      value={pickup.address}
+                      type="pickup"
+                      showCurrentLocation={true}
+                      isMapPicking={selectionMode === 'pickup'}
+                      onMapPickToggle={() => setSelectionMode(selectionMode === 'pickup' ? null : 'pickup')}
+                      onLocationSelect={(loc) => {
+                        setPickup({
+                          lat: loc.latitude,
+                          lng: loc.longitude,
+                          address: loc.placeName || loc.formattedAddress,
+                        });
+                      }}
+                      onClear={() => {
+                        setPickup({ lat: 0, lng: 0, address: '' });
+                      }}
+                    />
 
-                    {/* Destination */}
-                    <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                        Dropoff Destination
-                      </label>
-                      <div className="relative flex items-center">
-                        <div className="w-2.5 h-2.5 rounded-full bg-rose-500 absolute left-3" />
-                        <input
-                          type="text"
-                          value={dropoff.address}
-                          onChange={(e) => setDropoff({ ...dropoff, address: e.target.value })}
-                          className="w-full bg-pearl-100/70 border border-slate-200 rounded-2xl pl-8 pr-24 py-2.5 text-xs text-navy-900 placeholder-slate-400 focus:outline-none focus:border-electric-500 focus:bg-white transition"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setSelectionMode(selectionMode === 'dropoff' ? null : 'dropoff')}
-                          className={`absolute right-2 px-2.5 py-1 rounded-xl text-[10px] font-bold border transition cursor-pointer ${
-                            selectionMode === 'dropoff'
-                              ? 'bg-electric-500 text-white border-electric-500'
-                              : 'bg-white text-navy-900 border-slate-200 hover:bg-pearl-100'
-                          }`}
-                        >
-                          {selectionMode === 'dropoff' ? 'Cancel' : 'Pick on Map'}
-                        </button>
-                      </div>
-                    </div>
+                    {/* Destination / Dropoff Search Input */}
+                    <LocationSearchInput
+                      label="Dropoff Destination"
+                      placeholder="Where to?"
+                      value={dropoff.address}
+                      type="dropoff"
+                      showCurrentLocation={false}
+                      isMapPicking={selectionMode === 'dropoff'}
+                      onMapPickToggle={() => setSelectionMode(selectionMode === 'dropoff' ? null : 'dropoff')}
+                      onLocationSelect={(loc) => {
+                        setDropoff({
+                          lat: loc.latitude,
+                          lng: loc.longitude,
+                          address: loc.placeName || loc.formattedAddress,
+                        });
+                      }}
+                      onClear={() => {
+                        setDropoff({ lat: 0, lng: 0, address: '' });
+                      }}
+                    />
                   </div>
 
                   {/* Tier Categories List */}

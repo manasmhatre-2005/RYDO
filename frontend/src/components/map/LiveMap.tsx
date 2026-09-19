@@ -44,8 +44,8 @@ export const LiveMap: React.FC<MapProps> = ({
   const routePolylineRef = useRef<L.Polyline | null>(null);
 
   const currentDriverCoords = useRef<{ lat: number; lng: number; bearing: number }>({
-    lat: driverLocation?.lat || 37.7749,
-    lng: driverLocation?.lng || -122.4194,
+    lat: driverLocation?.lat || 19.0760,
+    lng: driverLocation?.lng || 72.8777,
     bearing: 0,
   });
   const animationFrameRef = useRef<number | null>(null);
@@ -54,8 +54,8 @@ export const LiveMap: React.FC<MapProps> = ({
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-    const initialLat = pickup?.lat || 37.7749;
-    const initialLng = pickup?.lng || -122.4194;
+    const initialLat = pickup?.lat || 19.0760;
+    const initialLng = pickup?.lng || 72.8777;
 
     const map = L.map(mapContainerRef.current, {
       center: [initialLat, initialLng],

@@ -136,7 +136,26 @@ def test_full_system():
         assert res.status_code == 200
         print(f"Admin rides count: {len(res.json())}")
 
-        print("\n ALL 16 BACKEND SYSTEM & AI VERIFICATIONS PASSED WITH 100% SUCCESS!")
+        print("\n>>> 17. Forward and Reverse Geocoding...")
+        res = client.get("/api/v1/rides/geocode/search?q=Mumbai+Airport&limit=3")
+        assert res.status_code == 200
+        search_results = res.json()
+        print(f"Geocode search returned {len(search_results)} locations.")
+        if search_results:
+            print(f"Top location: {search_results[0]['placeName']} ({search_results[0]['city']}, {search_results[0]['state']})")
+            assert "latitude" in search_results[0]
+            assert "longitude" in search_results[0]
+            assert "placeName" in search_results[0]
+
+        res = client.get("/api/v1/rides/geocode/reverse?lat=19.0901&lng=72.8638")
+        assert res.status_code == 200
+        rev = res.json()
+        print(f"Reverse geocode: {rev.get('placeName')} | {rev.get('formattedAddress')}")
+        assert "placeName" in rev
+        assert "latitude" in rev
+
+        print("\n ALL 17 BACKEND SYSTEM, AI & GEOCODING VERIFICATIONS PASSED WITH 100% SUCCESS!")
 
 if __name__ == "__main__":
     test_full_system()
+

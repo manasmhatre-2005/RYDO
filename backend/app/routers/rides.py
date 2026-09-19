@@ -29,6 +29,10 @@ from app.services.dispatch_service import (
     find_available_drivers,
     generate_otp,
 )
+from app.services.geocoding_service import (
+    search_locations_api,
+    reverse_geocode_api,
+)
 from app.websocket.connection_manager import manager
 
 router = APIRouter(prefix="/rides", tags=["Rides"])
@@ -155,6 +159,16 @@ def estimate_fares(req: FareEstimateRequest):
         dropoff_lat=req.dropoff_lat,
         dropoff_lng=req.dropoff_lng
     )
+
+@router.get("/geocode/search")
+async def search_locations(q: str = Query(..., min_length=1), limit: int = Query(6, ge=1, le=15)):
+    """Production forward geocoding search with Photon and Nominatim fallback."""
+    return await search_locations_api(query=q, limit=limit)
+
+@router.get("/geocode/reverse")
+async def reverse_geocode(lat: float = Query(...), lng: float = Query(...)):
+    """Production reverse geocoding from coordinates into a real place name and address."""
+    return await reverse_geocode_api(latitude=lat, longitude=lng)
 
 @router.post("/request")
 async def request_ride(
