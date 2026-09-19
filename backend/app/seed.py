@@ -74,7 +74,7 @@ def seed_database():
                 "lat": 37.7749,
                 "lng": -122.4194,
                 "trips": 142,
-                "earnings": 1845.50,
+                "earnings": 18450.00,
                 "rating": 4.9
             },
             {
@@ -91,7 +91,7 @@ def seed_database():
                 "lat": 37.7833,
                 "lng": -122.4167,
                 "trips": 98,
-                "earnings": 2120.00,
+                "earnings": 21200.00,
                 "rating": 5.0
             },
             {
@@ -108,7 +108,7 @@ def seed_database():
                 "lat": 37.7690,
                 "lng": -122.4467,
                 "trips": 64,
-                "earnings": 1530.25,
+                "earnings": 15300.00,
                 "rating": 4.8
             }
         ]
@@ -158,7 +158,7 @@ def seed_database():
                 "dropoff": "Fisherman's Wharf, San Francisco, CA",
                 "dropoff_coords": (37.8080, -122.4177),
                 "type": "GO",
-                "fare": 18.50,
+                "fare": 185.00,
                 "distance": 3.8,
                 "duration": 14.0,
                 "days_ago": 2,
@@ -173,7 +173,7 @@ def seed_database():
                 "dropoff": "San Francisco International Airport (SFO)",
                 "dropoff_coords": (37.6213, -122.3790),
                 "type": "COMFORT",
-                "fare": 48.20,
+                "fare": 480.00,
                 "distance": 21.4,
                 "duration": 26.0,
                 "days_ago": 1,
@@ -188,7 +188,7 @@ def seed_database():
                 "dropoff": "Ferry Building, The Embarcadero",
                 "dropoff_coords": (37.7955, -122.3937),
                 "type": "XL",
-                "fare": 34.75,
+                "fare": 350.00,
                 "distance": 9.2,
                 "duration": 22.0,
                 "days_ago": 3,

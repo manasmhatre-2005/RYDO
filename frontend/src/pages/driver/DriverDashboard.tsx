@@ -212,7 +212,7 @@ export const DriverDashboard: React.FC<DriverDashboardProps> = ({
     if (!activeRide) return;
     try {
       const res = await apiClient.post(`/drivers/complete/${activeRide.id}`);
-      alert(`Trip completed successfully! Payout settled: $${res.data.payment?.driver_payout?.toFixed(2) || '0.00'}`);
+      alert(`Trip completed successfully! Payout settled: ₹${res.data.payment?.driver_payout?.toFixed(2) || '0.00'}`);
       setActiveRide(null);
       fetchDriverState();
       if (onTabChange) onTabChange('earnings');
@@ -280,7 +280,7 @@ export const DriverDashboard: React.FC<DriverDashboardProps> = ({
           <div>
             <div className="text-xs text-slate-500 font-bold">Total Payout Settled</div>
             <div className="text-2xl font-black text-navy-900 mt-0.5">
-              ${stats?.total_earnings?.toFixed(2) || '0.00'}
+              ₹{stats?.total_earnings?.toFixed(2) || '0.00'}
             </div>
           </div>
         </div>
@@ -333,7 +333,7 @@ export const DriverDashboard: React.FC<DriverDashboardProps> = ({
             <div className="text-right">
               <span className="text-[10px] uppercase font-bold text-slate-400">Total Net Income</span>
               <div className="text-2xl font-black text-emerald-600">
-                ${stats?.total_earnings?.toFixed(2) || '0.00'}
+                ₹{stats?.total_earnings?.toFixed(2) || '0.00'}
               </div>
             </div>
           </div>
@@ -347,7 +347,7 @@ export const DriverDashboard: React.FC<DriverDashboardProps> = ({
             <div className="p-5 rounded-2xl bg-pearl-50/70 border border-slate-200 shadow-sm">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Average Fare / Trip</span>
               <div className="text-2xl font-black text-navy-900 mt-1">
-                ${stats?.total_trips ? ((stats.total_earnings || 0) / stats.total_trips).toFixed(2) : '0.00'}
+                ₹{stats?.total_trips ? ((stats.total_earnings || 0) / stats.total_trips).toFixed(2) : '0.00'}
               </div>
               <p className="text-[11px] text-slate-400 mt-1">Across all completed dispatches</p>
             </div>
@@ -450,7 +450,7 @@ export const DriverDashboard: React.FC<DriverDashboardProps> = ({
                         Driver Payout (80%)
                       </span>
                       <div className="text-xl font-black text-navy-900 mt-0.5">
-                        ${(activeRide.estimated_fare * 0.8).toFixed(2)}
+                        ₹{(activeRide.estimated_fare * 0.8).toFixed(2)}
                       </div>
                     </div>
                     <span className="text-xs text-slate-500 font-mono font-medium">
@@ -553,7 +553,7 @@ export const DriverDashboard: React.FC<DriverDashboardProps> = ({
                             </span>
                             <div className="text-right">
                               <span className="text-lg font-black text-navy-900">
-                                ${(offer.estimated_fare * 0.8).toFixed(2)}
+                                ₹{(offer.estimated_fare * 0.8).toFixed(2)}
                               </span>
                               <span className="text-[9px] text-slate-400 block font-medium">Payout (80%)</span>
                             </div>

@@ -36,13 +36,13 @@ def generate_ai_mobility_response(query: str, user_role: str, user_name: str) ->
         fare_comfort = calculate_fare(dist, dur, "COMFORT")
         fare_xl = calculate_fare(dist, dur, "XL")
         return (
-            f"Hello {user_name}! A standard trip from Downtown SF to San Francisco International Airport (SFO) is approximately **{dist} km** (~{dur} mins).\n\n"
-            f"• **RYDO Go**: ~${fare_go:.2f}\n"
-            f"• **RYDO Comfort**: ~${fare_comfort:.2f}\n"
-            f"• **RYDO XL** (SUV/Luggage): ~${fare_xl:.2f}\n\n"
-            f"All rides feature guaranteed upfront pricing, flight tracking, and verified drivers.",
+            f"Hello {user_name}! A standard trip to the Airport is approximately **{dist} km** (~{dur} mins).\n\n"
+            f"• **RYDO Go**: ~₹{fare_go:.2f}\n"
+            f"• **RYDO Comfort**: ~₹{fare_comfort:.2f}\n"
+            f"• **RYDO XL** (SUV/Luggage): ~₹{fare_xl:.2f}\n\n"
+            f"All rides feature guaranteed upfront pricing in INR (₹), flight tracking, and verified drivers.",
             [
-                "Book ride to SFO Airport",
+                "Book ride to Airport",
                 "What is the cancellation policy?",
                 "How does the security PIN work?"
             ]

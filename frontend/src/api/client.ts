@@ -1,7 +1,13 @@
 import axios from 'axios';
 
 // Resolve API base URL: Render or local development
-const rawBaseUrl = import.meta.env.VITE_API_URL || '';
+const normalizeUrl = (url: string) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `https://${url}`;
+};
+
+const rawBaseUrl = normalizeUrl(import.meta.env.VITE_API_URL || '');
 export const API_BASE_URL = rawBaseUrl.endsWith('/')
   ? `${rawBaseUrl}api/v1`
   : rawBaseUrl

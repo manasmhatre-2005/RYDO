@@ -40,7 +40,7 @@ def get_tier_rates(vehicle_type: str) -> Dict[str, Any]:
             "base_fare": settings.BASE_FARE_GO,
             "per_km": settings.PER_KM_GO,
             "per_min": settings.PER_MIN_GO,
-            "min_fare": 5.00,
+            "min_fare": 80.00,
             "eta_offset": 2
         },
         "COMFORT": {
@@ -50,7 +50,7 @@ def get_tier_rates(vehicle_type: str) -> Dict[str, Any]:
             "base_fare": settings.BASE_FARE_COMFORT,
             "per_km": settings.PER_KM_COMFORT,
             "per_min": settings.PER_MIN_COMFORT,
-            "min_fare": 8.00,
+            "min_fare": 120.00,
             "eta_offset": 4
         },
         "XL": {
@@ -60,7 +60,7 @@ def get_tier_rates(vehicle_type: str) -> Dict[str, Any]:
             "base_fare": settings.BASE_FARE_XL,
             "per_km": settings.PER_KM_XL,
             "per_min": settings.PER_MIN_XL,
-            "min_fare": 12.00,
+            "min_fare": 180.00,
             "eta_offset": 6
         },
         "PREMIUM": {
@@ -70,7 +70,7 @@ def get_tier_rates(vehicle_type: str) -> Dict[str, Any]:
             "base_fare": settings.BASE_FARE_PREMIUM,
             "per_km": settings.PER_KM_PREMIUM,
             "per_min": settings.PER_MIN_PREMIUM,
-            "min_fare": 20.00,
+            "min_fare": 300.00,
             "eta_offset": 8
         }
     }

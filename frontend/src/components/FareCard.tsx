@@ -72,7 +72,7 @@ export const FareCard: React.FC<FareCardProps> = ({ tier, isSelected, onSelect }
 
       <div className="text-right">
         <div className="text-base sm:text-lg font-black text-navy-900">
-          ${tier.estimated_fare.toFixed(2)}
+          ₹{tier.estimated_fare.toFixed(2)}
         </div>
         <div className="text-[9px] text-slate-400 font-medium">Fare estimate</div>
       </div>

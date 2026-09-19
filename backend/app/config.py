@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     # Environment
     ENVIRONMENT: str = "development"
     
+    # Currency
+    CURRENCY_CODE: str = "INR"
+    CURRENCY_SYMBOL: str = "₹"
+    
     # Database
     DATABASE_URL: str = "sqlite:///./rydo.db"
     
@@ -21,22 +25,22 @@ class Settings(BaseSettings):
     # CORS
     CORS_ORIGINS: Union[str, List[str]] = ["*"]
     
-    # Fare Rates Configuration
-    BASE_FARE_GO: float = 3.50
-    PER_KM_GO: float = 1.25
-    PER_MIN_GO: float = 0.25
+    # Fare Rates Configuration (in INR ₹)
+    BASE_FARE_GO: float = 60.00
+    PER_KM_GO: float = 14.00
+    PER_MIN_GO: float = 2.00
     
-    BASE_FARE_COMFORT: float = 5.50
-    PER_KM_COMFORT: float = 1.75
-    PER_MIN_COMFORT: float = 0.35
+    BASE_FARE_COMFORT: float = 90.00
+    PER_KM_COMFORT: float = 18.00
+    PER_MIN_COMFORT: float = 2.50
     
-    BASE_FARE_XL: float = 8.00
-    PER_KM_XL: float = 2.40
-    PER_MIN_XL: float = 0.45
+    BASE_FARE_XL: float = 140.00
+    PER_KM_XL: float = 24.00
+    PER_MIN_XL: float = 3.50
     
-    BASE_FARE_PREMIUM: float = 12.00
-    PER_KM_PREMIUM: float = 3.20
-    PER_MIN_PREMIUM: float = 0.60
+    BASE_FARE_PREMIUM: float = 220.00
+    PER_KM_PREMIUM: float = 35.00
+    PER_MIN_PREMIUM: float = 5.00
     
     PLATFORM_COMMISSION_PERCENT: float = 20.0  # Platform takes 20%, driver keeps 80%
     

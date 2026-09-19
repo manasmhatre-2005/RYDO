@@ -94,7 +94,7 @@ export const RatingModal: React.FC<RatingModalProps> = ({
           )}
 
           <h3 className="text-xl font-black text-navy-900">How was your ride with {driverName}?</h3>
-          <p className="text-xs text-slate-500 mt-1">Trip settled: <span className="font-bold text-navy-900">${fare.toFixed(2)}</span></p>
+          <p className="text-xs text-slate-500 mt-1">Trip settled: <span className="font-bold text-navy-900">₹{fare.toFixed(2)}</span></p>
 
           {/* Star Rating selector */}
           <div className="flex items-center justify-center space-x-2 my-5">

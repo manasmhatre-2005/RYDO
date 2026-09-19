@@ -192,7 +192,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <DollarSign className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="text-2xl sm:text-3xl font-black text-navy-900">
-            ${analytics?.total_gmv?.toFixed(2) || '0.00'}
+            ₹{analytics?.total_gmv?.toFixed(2) || '0.00'}
           </div>
           <span className="text-[10px] text-emerald-600 font-bold">Total processed bookings</span>
         </div>
@@ -204,7 +204,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <TrendingUp className="w-4 h-4 text-electric-600" />
           </div>
           <div className="text-2xl sm:text-3xl font-black text-electric-600">
-            ${analytics?.total_platform_revenue?.toFixed(2) || '0.00'}
+            ₹{analytics?.total_platform_revenue?.toFixed(2) || '0.00'}
           </div>
           <span className="text-[10px] text-electric-600 font-bold">RYDO platform take-rate</span>
         </div>
@@ -288,7 +288,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       <td className="py-3 text-navy-900 font-semibold">{ride.passenger?.full_name || `User #${ride.passenger_id}`}</td>
                       <td className="py-3 text-slate-600">{ride.driver?.full_name || 'Unassigned'}</td>
                       <td className="py-3 font-black text-electric-600">RYDO {ride.vehicle_type}</td>
-                      <td className="py-3 font-black text-navy-900">${(ride.final_fare || ride.estimated_fare).toFixed(2)}</td>
+                      <td className="py-3 font-black text-navy-900">₹{(ride.final_fare || ride.estimated_fare).toFixed(2)}</td>
                       <td className="py-3 text-slate-400">{new Date(ride.created_at).toLocaleTimeString()}</td>
                     </tr>
                   ))}
@@ -339,7 +339,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <td className="py-3 font-bold text-navy-900">{d.vehicle_type}</td>
                     <td className="py-3 text-slate-600 font-semibold">{d.total_trips}</td>
                     <td className="py-3 text-amber-500 font-bold">★ {d.rating.toFixed(1)}</td>
-                    <td className="py-3 font-black text-emerald-600">${d.total_earnings.toFixed(2)}</td>
+                    <td className="py-3 font-black text-emerald-600">₹{d.total_earnings.toFixed(2)}</td>
                     <td className="py-3">
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${
                         d.is_verified 
@@ -422,9 +422,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <td className="py-3 text-navy-900 font-medium">{ride.passenger?.full_name || `#${ride.passenger_id}`}</td>
                     <td className="py-3 text-slate-600">{ride.driver?.full_name || '—'}</td>
                     <td className="py-3 text-slate-500">{ride.distance_km} km • {ride.duration_minutes} min</td>
-                    <td className="py-3 font-black text-navy-900">${(ride.final_fare || ride.estimated_fare).toFixed(2)}</td>
+                    <td className="py-3 font-black text-navy-900">₹{(ride.final_fare || ride.estimated_fare).toFixed(2)}</td>
                     <td className="py-3 font-black text-electric-600">
-                      ${((ride.final_fare || ride.estimated_fare) * 0.20).toFixed(2)}
+                      ₹{((ride.final_fare || ride.estimated_fare) * 0.20).toFixed(2)}
                     </td>
                     <td className="py-3 font-mono text-[10px] text-slate-400">
                       {ride.payment?.transaction_id || 'Pending'}
@@ -468,15 +468,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div className="space-y-2 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400">Base Fare:</span>
-                    <span className="font-bold text-navy-900">${rates.base.toFixed(2)}</span>
+                    <span className="font-bold text-navy-900">₹{rates.base.toFixed(2)}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400">Rate / km:</span>
-                    <span className="font-bold text-navy-900">${rates.per_km.toFixed(2)}</span>
+                    <span className="font-bold text-navy-900">₹{rates.per_km.toFixed(2)}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400">Rate / minute:</span>
-                    <span className="font-bold text-navy-900">${rates.per_min.toFixed(2)}</span>
+                    <span className="font-bold text-navy-900">₹{rates.per_min.toFixed(2)}</span>
                   </div>
                 </div>
               </div>

@@ -1,3 +1,7 @@
+import sys
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -54,7 +58,7 @@ def test_full_system():
         est = res.json()
         print(f"Estimated Distance: {est['distance_km']} km, Duration: {est['duration_minutes']} min")
         for tier in est["tiers"]:
-            print(f"  - {tier['name']} ({tier['vehicle_type']}): ${tier['estimated_fare']} (ETA: {tier['eta_minutes']} min)")
+            print(f"  - {tier['name']} ({tier['vehicle_type']}): ₹{tier['estimated_fare']} (ETA: {tier['eta_minutes']} min)")
 
         print("\n>>> 8. Request Ride...")
         req_ride = {
@@ -105,7 +109,7 @@ def test_full_system():
         res = client.post(f"/api/v1/drivers/complete/{ride_id}", headers=headers_driver)
         assert res.status_code == 200, f"Driver complete failed: {res.text}"
         comp = res.json()
-        print(f"Trip completed! Fare: ${comp['final_fare']}, Payment: {comp['payment']}")
+        print(f"Trip completed! Fare: ₹{comp['final_fare']}, Payment: {comp['payment']}")
 
         print("\n>>> 14. Passenger rates driver...")
         rate_payload = {

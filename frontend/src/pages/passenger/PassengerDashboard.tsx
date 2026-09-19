@@ -435,7 +435,7 @@ export const PassengerDashboard: React.FC<PassengerDashboardProps> = ({
                     )}
                     <div className="text-right">
                       <div className="text-base font-black text-navy-900">
-                        ${(trip.final_fare || trip.estimated_fare).toFixed(2)}
+                        ₹{(trip.final_fare || trip.estimated_fare).toFixed(2)}
                       </div>
                       <div className="text-[10px] text-emerald-600 font-bold">Settled • Card</div>
                     </div>
@@ -603,7 +603,7 @@ export const PassengerDashboard: React.FC<PassengerDashboardProps> = ({
                   <div className="p-3.5 rounded-2xl bg-pearl-50/70 border border-slate-200 flex items-center justify-between">
                     <div>
                       <span className="text-[11px] text-slate-400 font-medium">Estimated Fare</span>
-                      <div className="text-lg font-black text-navy-900">${activeRide.estimated_fare.toFixed(2)}</div>
+                      <div className="text-lg font-black text-navy-900">₹{activeRide.estimated_fare.toFixed(2)}</div>
                     </div>
                     <div className="text-right">
                       <span className="text-[10px] text-slate-400 font-medium">Vehicle Tier</span>
