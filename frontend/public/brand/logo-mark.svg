@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="rydoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0ea5e9" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+  </defs>
+  <!-- Rounded Platinum / Glass Backdrop -->
+  <rect width="100" height="100" rx="28" fill="#ffffff" />
+  <rect width="100" height="100" rx="28" stroke="#e2e8f0" stroke-width="3" />
+  
+  <!-- Aerodynamic R / Mobility Path -->
+  <path d="M30 76 V24 H56 C68 24 74 31 74 42 C74 53 67 58 56 58 H30" 
+        stroke="url(#rydoGrad)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M50 56 L72 76" 
+        stroke="url(#accentGrad)" stroke-width="10" stroke-linecap="round" />
+  
+  <!-- Glowing Waypoint Node -->
+  <circle cx="72" cy="76" r="4.5" fill="#0ea5e9" />
+</svg>

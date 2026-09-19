@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, CheckCircle, Heart, ThumbsUp, Sparkles, MessageSquare } from 'lucide-react';
+import { Star, CheckCircle, Sparkles, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { apiClient } from '../api/client';
 
@@ -24,7 +24,6 @@ export const RatingModal: React.FC<RatingModalProps> = ({
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [comment, setComment] = useState<string>('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [tip, setTip] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const tags = ["Great Conversation", "Clean Car", "Smooth Navigation", "Polite & Professional", "Fast Pickup"];
@@ -69,24 +68,33 @@ export const RatingModal: React.FC<RatingModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-dark-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-dark-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-navy-950/40 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white/95 backdrop-blur-2xl border border-slate-200/80 rounded-3xl w-full max-w-md p-6 shadow-luxury-lg animate-in zoom-in-95 duration-200">
         
-        <div className="text-center">
+        <div className="flex justify-end">
+          <button 
+            onClick={onClose}
+            className="p-1 rounded-full text-slate-400 hover:text-navy-900 transition hover:bg-pearl-100"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="text-center -mt-2">
           {driverAvatar ? (
             <img
               src={driverAvatar}
               alt={driverName}
-              className="w-16 h-16 rounded-full mx-auto border-2 border-brand-500 object-cover shadow-lg mb-3"
+              className="w-16 h-16 rounded-2xl mx-auto border-2 border-electric-400 object-cover shadow-md mb-3"
             />
           ) : (
-            <div className="w-16 h-16 rounded-full mx-auto bg-dark-800 border-2 border-brand-500 flex items-center justify-center text-xl font-bold text-brand-400 mb-3">
+            <div className="w-16 h-16 rounded-2xl mx-auto bg-electric-50 border-2 border-electric-300 flex items-center justify-center text-xl font-bold text-electric-600 mb-3">
               {driverName.charAt(0)}
             </div>
           )}
 
-          <h3 className="text-xl font-extrabold text-white">How was your ride with {driverName}?</h3>
-          <p className="text-xs text-slate-400 mt-1">Trip settled: ${fare.toFixed(2)}</p>
+          <h3 className="text-xl font-black text-navy-900">How was your ride with {driverName}?</h3>
+          <p className="text-xs text-slate-500 mt-1">Trip settled: <span className="font-bold text-navy-900">${fare.toFixed(2)}</span></p>
 
           {/* Star Rating selector */}
           <div className="flex items-center justify-center space-x-2 my-5">
@@ -97,76 +105,55 @@ export const RatingModal: React.FC<RatingModalProps> = ({
                 onMouseEnter={() => setHoverRating(star)}
                 onMouseLeave={() => setHoverRating(0)}
                 onClick={() => setRating(star)}
-                className="p-1 transition-transform hover:scale-125 focus:outline-none"
+                className="p-1 transition-transform hover:scale-125 focus:outline-none cursor-pointer"
               >
                 <Star
                   className={`w-8 h-8 ${
                     (hoverRating || rating) >= star
-                      ? 'text-brand-400 fill-brand-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]'
-                      : 'text-slate-600'
+                      ? 'text-amber-400 fill-amber-400 drop-shadow-sm'
+                      : 'text-slate-200'
                   }`}
                 />
               </button>
             ))}
           </div>
 
-          {/* Quick compliment tags */}
+          {/* Tags */}
           <div className="flex flex-wrap gap-1.5 justify-center mb-4">
-            {tags.map((tag) => {
-              const active = selectedTags.includes(tag);
-              return (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => toggleTag(tag)}
-                  className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                    active
-                      ? 'bg-brand-500/20 border-brand-500 text-brand-300 font-semibold'
-                      : 'bg-dark-800 border-slate-700 text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  {tag}
-                </button>
-              );
-            })}
+            {tags.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => toggleTag(tag)}
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition cursor-pointer ${
+                  selectedTags.includes(tag)
+                    ? 'bg-electric-500 text-white shadow-sm'
+                    : 'bg-pearl-100 text-slate-600 hover:bg-pearl-200'
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
           </div>
 
-          {/* Optional Comment */}
-          <div className="mb-5">
-            <textarea
-              rows={3}
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Leave a note for your driver (optional)..."
-              className="w-full bg-dark-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 resize-none"
-            />
-          </div>
+          {/* Comment text area */}
+          <textarea
+            rows={2}
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Share details about your trip experience (optional)..."
+            className="w-full bg-pearl-100/60 border border-slate-200 rounded-2xl p-3 text-xs text-navy-900 placeholder-slate-400 focus:outline-none focus:border-electric-500 focus:bg-white transition"
+          />
 
-          {/* Actions */}
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="w-1/3 py-2.5 rounded-xl border border-slate-700 text-slate-300 text-xs font-semibold hover:bg-dark-800 transition"
-            >
-              Skip
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="w-2/3 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-400 text-dark-950 text-xs font-extrabold transition shadow-lg shadow-brand-500/20 flex items-center justify-center space-x-1.5 cursor-pointer"
-            >
-              {isSubmitting ? (
-                <span>Submitting...</span>
-              ) : (
-                <>
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Submit Feedback</span>
-                </>
-              )}
-            </button>
-          </div>
-
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={handleSubmit}
+            className="w-full mt-4 py-3 rounded-2xl bg-gradient-to-tr from-electric-600 to-electric-500 hover:from-electric-500 hover:to-electric-400 text-white font-black text-xs transition shadow-md shadow-electric-500/25 flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>{isSubmitting ? 'Submitting...' : 'Submit Rating & Feedback'}</span>
+          </button>
         </div>
 
       </div>

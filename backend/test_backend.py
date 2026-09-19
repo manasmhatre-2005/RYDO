@@ -27,7 +27,22 @@ def test_full_system():
         headers_passenger = {"Authorization": f"Bearer {passenger_token}"}
         print("Passenger logged in successfully:", res.json()["email"])
 
-        print("\n>>> 5. Fare Estimation...")
+        print("\n>>> 5. Notifications check...")
+        res = client.get("/api/v1/notifications", headers=headers_passenger)
+        assert res.status_code == 200, f"Notifications failed: {res.text}"
+        notifications = res.json()
+        assert len(notifications) > 0, "Expected at least 1 notification"
+        print(f"Passenger received {len(notifications)} notifications.")
+
+        print("\n>>> 6. RYDO AI Chatbot...")
+        ai_req = {"message": "How much does a ride to SFO airport cost?"}
+        res = client.post("/api/v1/ai/chat", json=ai_req, headers=headers_passenger)
+        assert res.status_code == 200, f"AI chat failed: {res.text}"
+        ai_resp = res.json()
+        assert "SFO" in ai_resp["response"] or "airport" in ai_resp["response"].lower()
+        print("RYDO AI Response received:", ai_resp["response"][:80], "...")
+
+        print("\n>>> 7. Fare Estimation...")
         estimate_payload = {
             "pickup_lat": 37.7749,
             "pickup_lng": -122.4194,
@@ -41,7 +56,7 @@ def test_full_system():
         for tier in est["tiers"]:
             print(f"  - {tier['name']} ({tier['vehicle_type']}): ${tier['estimated_fare']} (ETA: {tier['eta_minutes']} min)")
 
-        print("\n>>> 6. Request Ride...")
+        print("\n>>> 8. Request Ride...")
         req_ride = {
             "pickup_address": "Market St & 5th St, San Francisco, CA",
             "pickup_lat": 37.7831,
@@ -59,14 +74,14 @@ def test_full_system():
         otp_code = ride_data["otp_code"]
         print(f"Ride #{ride_id} created in status '{ride_data['status']}', OTP: {otp_code}")
 
-        print("\n>>> 7. Demo Login - Driver...")
+        print("\n>>> 9. Demo Login - Driver...")
         res = client.post("/api/v1/auth/demo-login/driver")
         assert res.status_code == 200, f"Driver login failed: {res.text}"
         driver_token = res.json()["access_token"]
         headers_driver = {"Authorization": f"Bearer {driver_token}"}
         print("Driver logged in successfully:", res.json()["email"])
 
-        print("\n>>> 8. Driver checks offers and accepts ride...")
+        print("\n>>> 10. Driver checks offers and accepts ride...")
         res = client.get("/api/v1/drivers/offers", headers=headers_driver)
         assert res.status_code == 200
         offers = res.json()
@@ -76,23 +91,23 @@ def test_full_system():
         assert res.status_code == 200, f"Driver accept failed: {res.text}"
         print(f"Driver accepted ride #{ride_id}. Status: {res.json()['status']}")
 
-        print("\n>>> 9. Driver arrives at pickup...")
+        print("\n>>> 11. Driver arrives at pickup...")
         res = client.post(f"/api/v1/drivers/arrived/{ride_id}", headers=headers_driver)
         assert res.status_code == 200
         print(f"Driver marked arrived. Status: {res.json()['status']}")
 
-        print("\n>>> 10. Driver enters passenger OTP and starts trip...")
+        print("\n>>> 12. Driver enters passenger OTP and starts trip...")
         res = client.post(f"/api/v1/drivers/start/{ride_id}", json={"otp_code": otp_code}, headers=headers_driver)
         assert res.status_code == 200, f"Driver start failed: {res.text}"
         print(f"Trip started! Status: {res.json()['status']}")
 
-        print("\n>>> 11. Driver completes trip...")
+        print("\n>>> 13. Driver completes trip...")
         res = client.post(f"/api/v1/drivers/complete/{ride_id}", headers=headers_driver)
         assert res.status_code == 200, f"Driver complete failed: {res.text}"
         comp = res.json()
         print(f"Trip completed! Fare: ${comp['final_fare']}, Payment: {comp['payment']}")
 
-        print("\n>>> 12. Passenger rates driver...")
+        print("\n>>> 14. Passenger rates driver...")
         rate_payload = {
             "ride_id": ride_id,
             "rating": 5,
@@ -102,13 +117,13 @@ def test_full_system():
         assert res.status_code == 200, f"Rate ride failed: {res.text}"
         print("Rating submitted:", res.json())
 
-        print("\n>>> 13. Passenger checks history...")
+        print("\n>>> 15. Passenger checks history...")
         res = client.get("/api/v1/rides/history", headers=headers_passenger)
         assert res.status_code == 200
         history = res.json()
         print(f"Passenger history count: {len(history)}")
 
-        print("\n>>> 14. Admin verifies drivers and rides list...")
+        print("\n>>> 16. Admin verifies drivers and rides list...")
         res = client.get("/api/v1/admin/drivers", headers=headers_admin)
         assert res.status_code == 200
         print(f"Admin drivers count: {len(res.json())}")
@@ -117,7 +132,7 @@ def test_full_system():
         assert res.status_code == 200
         print(f"Admin rides count: {len(res.json())}")
 
-        print("\n ALL 14 BACKEND SYSTEM VERIFICATIONS PASSED WITH 100% SUCCESS!")
+        print("\n ALL 16 BACKEND SYSTEM & AI VERIFICATIONS PASSED WITH 100% SUCCESS!")
 
 if __name__ == "__main__":
     test_full_system()

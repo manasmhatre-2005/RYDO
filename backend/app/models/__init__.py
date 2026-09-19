@@ -4,6 +4,8 @@ from app.models.driver import DriverProfile, VehicleType
 from app.models.ride import Ride, RideStatus
 from app.models.payment import Payment, PaymentMethod, PaymentStatus
 from app.models.rating import Rating
+from app.models.ai import AIConversation, AIMessage
+from app.models.notification import Notification
 
 __all__ = [
     "Base",
@@ -17,4 +19,7 @@ __all__ = [
     "PaymentMethod",
     "PaymentStatus",
     "Rating",
+    "AIConversation",
+    "AIMessage",
+    "Notification",
 ]

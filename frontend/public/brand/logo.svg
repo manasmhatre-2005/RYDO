@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" fill="none">
+  <defs>
+    <linearGradient id="rydoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0ea5e9" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+  </defs>
+
+  <!-- Emblem -->
+  <g transform="translate(10, 10)">
+    <rect width="60" height="60" rx="18" fill="#ffffff" />
+    <rect width="60" height="60" rx="18" stroke="#e2e8f0" stroke-width="2" />
+    <path d="M18 46 V14 H34 C41 14 45 18 45 25 C45 32 41 35 34 35 H18" 
+          stroke="url(#rydoGrad)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M30 34 L44 46" 
+          stroke="url(#accentGrad)" stroke-width="6" stroke-linecap="round" />
+    <circle cx="44" cy="46" r="3" fill="#0ea5e9" />
+  </g>
+
+  <!-- Typography -->
+  <text x="86" y="47" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-weight="900" font-size="34" fill="#0b132b" letter-spacing="-0.5">RYDO</text>
+  <text x="86" y="63" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-weight="600" font-size="10.5" fill="#64748b" letter-spacing="1.5">MOVE SMARTER. RIDE BETTER.</text>
+</svg>

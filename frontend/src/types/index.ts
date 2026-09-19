@@ -146,3 +146,19 @@ export interface AuthResponse {
   full_name: string;
   email: string;
 }
+
+export interface NotificationItem {
+  id: number;
+  title: string;
+  message: string;
+  notification_type: 'INFO' | 'RIDE' | 'PAYMENT' | 'SYSTEM';
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface ChatMessage {
+  id?: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp?: string;
+}

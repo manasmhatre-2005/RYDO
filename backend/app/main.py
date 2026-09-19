@@ -4,7 +4,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import Base, engine
 import app.models  # Ensure all SQLAlchemy models are registered
-from app.routers import auth_router, rides_router, drivers_router, admin_router, ws_router
+from app.routers import (
+    auth_router,
+    rides_router,
+    drivers_router,
+    admin_router,
+    ws_router,
+    ai_router,
+    notifications_router
+)
 from app.seed import seed_database
 import logging
 
@@ -20,7 +28,6 @@ except Exception as e:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Ensure database schema is created and seeded
     logger.info("RYDO API starting up...")
     Base.metadata.create_all(bind=engine)
     try:
@@ -33,7 +40,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="RYDO — Move Smarter. Ride Better. Production-Structured Ride-Booking Platform API.",
+    description="RYDO — Move Smarter. Ride Better. Light Luxury 3D Mobility Software Platform API.",
     lifespan=lifespan
 )
 
@@ -58,6 +65,8 @@ app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(rides_router, prefix=settings.API_V1_STR)
 app.include_router(drivers_router, prefix=settings.API_V1_STR)
 app.include_router(admin_router, prefix=settings.API_V1_STR)
+app.include_router(ai_router, prefix=settings.API_V1_STR)
+app.include_router(notifications_router, prefix=settings.API_V1_STR)
 # Mount WebSocket router
 app.include_router(ws_router)
 
@@ -67,6 +76,7 @@ def health_check():
         "status": "healthy",
         "app": "RYDO API",
         "version": settings.VERSION,
+        "theme": "Light Luxury Mobility",
         "environment": settings.ENVIRONMENT
     }
 

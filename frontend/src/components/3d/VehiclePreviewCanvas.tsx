@@ -10,7 +10,6 @@ interface VehiclePreviewCanvasProps {
   isDriving?: boolean;
 }
 
-// Lightweight WebGL capability check
 function checkWebGLSupport(): boolean {
   if (typeof window === 'undefined') return false;
   try {
@@ -26,7 +25,7 @@ function checkWebGLSupport(): boolean {
 
 export const VehiclePreviewCanvas: React.FC<VehiclePreviewCanvasProps> = ({
   vehicleType = 'GO',
-  className = "w-full h-44 sm:h-52 rounded-2xl overflow-hidden",
+  className = "w-full h-48 sm:h-56 rounded-3xl overflow-hidden",
   isDriving = false,
 }) => {
   const [hasWebGL, setHasWebGL] = useState(true);
@@ -42,38 +41,36 @@ export const VehiclePreviewCanvas: React.FC<VehiclePreviewCanvasProps> = ({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Safe DPR setting: 1.0 on mobile, max 1.5 on desktop
   const dpr = useMemo(() => {
     if (isMobile) return 1.0;
     return Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 1.5);
   }, [isMobile]);
 
-  // Fallback 2D High-Performance View if WebGL is disabled or on low-end devices
   if (!hasWebGL) {
     return (
-      <div className={`relative bg-gradient-to-b from-obsidian-900 to-obsidian-950 border border-slate-800/80 flex flex-col items-center justify-center p-6 ${className}`}>
-        <div className="w-14 h-14 rounded-2xl bg-electric-500/10 border border-electric-500/30 flex items-center justify-center text-electric-400 mb-2">
+      <div className={`relative bg-gradient-to-b from-white to-pearl-100 border border-slate-200/80 flex flex-col items-center justify-center p-6 shadow-luxury ${className}`}>
+        <div className="w-14 h-14 rounded-2xl bg-electric-50 border border-electric-200 flex items-center justify-center text-electric-600 mb-2">
           <Car className="w-8 h-8" />
         </div>
-        <div className="text-xs font-black text-white">RYDO {vehicleType}</div>
-        <div className="text-[10px] text-slate-400">High-Efficiency Mobility Tier</div>
+        <div className="text-xs font-black text-navy-900">RYDO {vehicleType}</div>
+        <div className="text-[10px] text-slate-400 font-medium">Light Luxury Mobility Tier</div>
       </div>
     );
   }
 
   return (
-    <div className={`relative bg-gradient-to-b from-obsidian-900 to-obsidian-950 border border-slate-800/80 ${className}`}>
-      {/* Background grid */}
+    <div className={`relative bg-gradient-to-b from-white via-pearl-100/80 to-pearl-200/90 border border-slate-200/80 shadow-luxury ${className}`}>
+      {/* Subtle Pearl Grid */}
       <div 
-        className="absolute inset-0 opacity-15 pointer-events-none"
+        className="absolute inset-0 opacity-20 pointer-events-none"
         style={{
-          backgroundImage: 'radial-gradient(circle at 50% 50%, #0ea5e9 1px, transparent 1px)',
-          backgroundSize: '20px 20px'
+          backgroundImage: 'radial-gradient(circle at 50% 50%, #0284c7 1px, transparent 1px)',
+          backgroundSize: '22px 22px'
         }}
       />
 
       <Canvas
-        camera={{ position: [3.8, 2.2, 4.2], fov: 42 }}
+        camera={{ position: [3.8, 2.2, 4.2], fov: 40 }}
         dpr={dpr}
         gl={{
           antialias: true,
@@ -81,35 +78,35 @@ export const VehiclePreviewCanvas: React.FC<VehiclePreviewCanvasProps> = ({
           powerPreference: 'high-performance',
         }}
       >
-        <ambientLight intensity={0.8} />
+        <ambientLight intensity={1.1} />
         <directionalLight
           position={[6, 8, 4]}
-          intensity={1.6}
+          intensity={1.8}
         />
-        <directionalLight position={[-6, 4, -4]} intensity={1.0} color="#38bdf8" />
-        <pointLight position={[0, -0.2, 2]} intensity={0.6} color="#0ea5e9" />
+        <directionalLight position={[-6, 4, -4]} intensity={1.2} color="#bae6fd" />
+        <pointLight position={[0, -0.2, 2]} intensity={0.5} color="#0ea5e9" />
 
         <Suspense fallback={null}>
           <RydoVehicle3D vehicleType={vehicleType} isDriving={isDriving} scale={0.92} />
           
-          {/* Lightweight procedural contact shadow disc */}
-          <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[0.2, 1.8, 32]} />
-            <meshBasicMaterial color="#000000" transparent opacity={0.4} />
+          {/* Soft Pearl Shadow Disc */}
+          <mesh position={[0, 0.015, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.2, 1.9, 32]} />
+            <meshBasicMaterial color="#94a3b8" transparent opacity={0.25} />
           </mesh>
         </Suspense>
 
         <OrbitControls
           enableZoom={false}
           autoRotate={!isDriving}
-          autoRotateSpeed={1.3}
+          autoRotateSpeed={1.2}
           maxPolarAngle={Math.PI / 2.05}
           minPolarAngle={Math.PI / 3.8}
         />
       </Canvas>
 
-      <div className="absolute bottom-2.5 right-3 px-2 py-0.5 rounded-full bg-obsidian-900/80 border border-slate-700/60 text-[9px] text-slate-400 pointer-events-none select-none">
-        3D Interactive • Drag to rotate
+      <div className="absolute bottom-3 right-4 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md border border-slate-200/80 text-[10px] text-slate-500 font-bold shadow-sm pointer-events-none select-none">
+        3D Vehicle • Drag to orbit
       </div>
     </div>
   );

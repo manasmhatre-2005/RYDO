@@ -13,7 +13,6 @@ interface MapProps {
   className?: string;
 }
 
-// Calculate compass heading angle between two coordinates
 function calculateBearing(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
   const y = Math.sin(dLon) * Math.cos((lat2 * Math.PI) / 180);
@@ -33,7 +32,7 @@ export const LiveMap: React.FC<MapProps> = ({
   onLocationSelect,
   selectionMode,
   isSearching = false,
-  className = "h-[450px] w-full rounded-2xl overflow-hidden border border-slate-800"
+  className = "h-[460px] w-full rounded-3xl overflow-hidden border border-slate-200/80 shadow-luxury"
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -44,7 +43,6 @@ export const LiveMap: React.FC<MapProps> = ({
   const nearbyMarkersRef = useRef<L.Marker[]>([]);
   const routePolylineRef = useRef<L.Polyline | null>(null);
 
-  // References for smooth driver interpolation
   const currentDriverCoords = useRef<{ lat: number; lng: number; bearing: number }>({
     lat: driverLocation?.lat || 37.7749,
     lng: driverLocation?.lng || -122.4194,
@@ -52,7 +50,7 @@ export const LiveMap: React.FC<MapProps> = ({
   });
   const animationFrameRef = useRef<number | null>(null);
 
-  // 1. Initialize Leaflet Map
+  // 1. Initialize Map with CartoDB Positron Light Tiles
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
@@ -65,11 +63,10 @@ export const LiveMap: React.FC<MapProps> = ({
       zoomControl: false,
     });
 
-    // High-tech Obsidian CartoDB Tiles
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    // High-End Light Luxury CartoDB Positron Tiles
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
       maxZoom: 19,
-      className: 'dark-tiles'
     }).addTo(map);
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -91,12 +88,11 @@ export const LiveMap: React.FC<MapProps> = ({
     };
   }, []);
 
-  // 2. Update Pickup Marker & Animated Radar
+  // 2. Update Pickup Marker & Radar
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    // Cleanup existing
     if (pickupMarkerRef.current) {
       map.removeLayer(pickupMarkerRef.current);
       pickupMarkerRef.current = null;
@@ -107,19 +103,18 @@ export const LiveMap: React.FC<MapProps> = ({
     }
 
     if (pickup) {
-      // Futuristic Electric Blue Pickup Pin
       const pickupIcon = L.divIcon({
         className: 'custom-pickup-pin',
         html: `
           <div class="relative flex items-center justify-center">
-            <div class="w-7 h-7 rounded-full bg-obsidian-900 border-2 border-electric-400 shadow-lg shadow-electric-500/50 flex items-center justify-center">
-              <div class="w-2.5 h-2.5 rounded-full bg-electric-400 animate-pulse"></div>
+            <div class="w-8 h-8 rounded-full bg-white border-2 border-electric-500 shadow-luxury flex items-center justify-center">
+              <div class="w-3 h-3 rounded-full bg-electric-500 animate-pulse"></div>
             </div>
-            <div class="absolute -bottom-1 w-2 h-2 bg-electric-400 rotate-45"></div>
+            <div class="absolute -bottom-1 w-2.5 h-2.5 bg-electric-500 rotate-45"></div>
           </div>
         `,
-        iconSize: [28, 28],
-        iconAnchor: [14, 28],
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
       });
 
       const marker = L.marker([pickup.lat, pickup.lng], { icon: pickupIcon })
@@ -128,11 +123,10 @@ export const LiveMap: React.FC<MapProps> = ({
       
       pickupMarkerRef.current = marker;
 
-      // Animated Searching Radar
       if (isSearching) {
         const radarIcon = L.divIcon({
           className: 'custom-radar-icon',
-          html: `<div class="radar-ring w-24 h-24 -ml-12 -mt-12 pointer-events-none"></div>`,
+          html: `<div class="radar-ring w-28 h-28 -ml-14 -mt-14 pointer-events-none"></div>`,
           iconSize: [0, 0],
           iconAnchor: [0, 0],
         });
@@ -158,14 +152,14 @@ export const LiveMap: React.FC<MapProps> = ({
         className: 'custom-dropoff-pin',
         html: `
           <div class="relative flex items-center justify-center">
-            <div class="w-7 h-7 rounded-full bg-obsidian-900 border-2 border-rose-500 shadow-lg shadow-rose-500/40 flex items-center justify-center">
-              <div class="w-2.5 h-2.5 rounded-full bg-rose-500"></div>
+            <div class="w-8 h-8 rounded-full bg-white border-2 border-rose-500 shadow-luxury flex items-center justify-center">
+              <div class="w-3 h-3 rounded-full bg-rose-500"></div>
             </div>
-            <div class="absolute -bottom-1 w-2 h-2 bg-rose-500 rotate-45"></div>
+            <div class="absolute -bottom-1 w-2.5 h-2.5 bg-rose-500 rotate-45"></div>
           </div>
         `,
-        iconSize: [28, 28],
-        iconAnchor: [14, 28],
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
       });
 
       const marker = L.marker([dropoff.lat, dropoff.lng], { icon: dropoffIcon })
@@ -176,7 +170,7 @@ export const LiveMap: React.FC<MapProps> = ({
     }
   }, [dropoff]);
 
-  // 4. Smooth Interpolation for Driver Vehicle (LERP + Heading Rotation)
+  // 4. Smooth LERP Driver Vehicle Movement
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map || !driverLocation) {
@@ -190,7 +184,6 @@ export const LiveMap: React.FC<MapProps> = ({
     const targetLat = driverLocation.lat;
     const targetLng = driverLocation.lng;
 
-    // First time mounting driver marker
     if (!driverMarkerRef.current) {
       currentDriverCoords.current = {
         lat: targetLat,
@@ -202,24 +195,19 @@ export const LiveMap: React.FC<MapProps> = ({
         className: 'smooth-driver-marker',
         html: `
           <div id="rydo-driver-car" class="relative flex items-center justify-center transform transition-transform duration-300" style="transform: rotate(${currentDriverCoords.current.bearing}deg);">
-            <!-- Underglow aura -->
-            <div class="absolute w-11 h-11 rounded-full bg-electric-500/30 blur-[6px]"></div>
-            
-            <!-- Vehicle Chassis -->
-            <div class="w-10 h-10 rounded-2xl bg-obsidian-900 border-2 border-electric-400 shadow-2xl flex items-center justify-center">
-              <svg class="w-5 h-5 text-electric-400" viewBox="0 0 24 24" fill="currentColor">
+            <div class="absolute w-12 h-12 rounded-full bg-electric-500/20 blur-[6px]"></div>
+            <div class="w-10 h-10 rounded-2xl bg-white border-2 border-electric-500 shadow-luxury flex items-center justify-center">
+              <svg class="w-5 h-5 text-electric-600" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.85 7h10.29l1.04 3H5.81l1.04-3zM19 17H5v-4.66l.12-.34h13.77l.11.34V17z"/>
                 <circle cx="7.5" cy="14.5" r="1.5"/>
                 <circle cx="16.5" cy="14.5" r="1.5"/>
               </svg>
             </div>
-            
-            <!-- Directional Headlight Cone -->
-            <div class="absolute -top-2 w-3 h-2 bg-gradient-to-t from-electric-400/80 to-transparent rounded-t-full"></div>
+            <div class="absolute -top-2 w-3 h-2 bg-gradient-to-t from-electric-500/80 to-transparent rounded-t-full"></div>
           </div>
         `,
-        iconSize: [40, 40],
-        iconAnchor: [20, 20],
+        iconSize: [42, 42],
+        iconAnchor: [21, 21],
       });
 
       const marker = L.marker([targetLat, targetLng], { icon: driverIcon, zIndexOffset: 1000 })
@@ -229,22 +217,19 @@ export const LiveMap: React.FC<MapProps> = ({
       return;
     }
 
-    // Smooth Interpolation from Current -> Target
     const startLat = currentDriverCoords.current.lat;
     const startLng = currentDriverCoords.current.lng;
     
-    // Only animate if position changed
     if (Math.abs(startLat - targetLat) > 0.00001 || Math.abs(startLng - targetLng) > 0.00001) {
       const newBearing = calculateBearing(startLat, startLng, targetLat, targetLng);
       currentDriverCoords.current.bearing = newBearing;
 
-      // Update rotation transform
       const carElem = document.getElementById('rydo-driver-car');
       if (carElem) {
         carElem.style.transform = `rotate(${newBearing}deg)`;
       }
 
-      const duration = 750; // ms
+      const duration = 750;
       const startTime = performance.now();
 
       if (animationFrameRef.current) {
@@ -254,8 +239,6 @@ export const LiveMap: React.FC<MapProps> = ({
       const animateStep = (now: number) => {
         const elapsed = now - startTime;
         const progress = Math.min(elapsed / duration, 1.0);
-        
-        // Smooth easeOutQuad
         const ease = 1 - (1 - progress) * (1 - progress);
         const curLat = startLat + (targetLat - startLat) * ease;
         const curLng = startLng + (targetLng - startLng) * ease;
@@ -276,7 +259,7 @@ export const LiveMap: React.FC<MapProps> = ({
     }
   }, [driverLocation?.lat, driverLocation?.lng]);
 
-  // 5. Update Nearby Drivers
+  // 5. Nearby Drivers
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
@@ -288,8 +271,8 @@ export const LiveMap: React.FC<MapProps> = ({
       const icon = L.divIcon({
         className: 'nearby-car-marker',
         html: `
-          <div class="w-6 h-6 rounded-full bg-obsidian-900 border border-electric-500 shadow-md flex items-center justify-center opacity-85 hover:opacity-100 hover:scale-110 transition">
-            <div class="w-2 h-2 rounded-full bg-electric-400"></div>
+          <div class="w-6 h-6 rounded-full bg-white border border-electric-400 shadow-md flex items-center justify-center hover:scale-110 transition">
+            <div class="w-2 h-2 rounded-full bg-electric-500"></div>
           </div>
         `,
         iconSize: [24, 24],
@@ -300,7 +283,7 @@ export const LiveMap: React.FC<MapProps> = ({
     });
   }, [nearbyDrivers]);
 
-  // 6. Update Route Polyline & Bounds
+  // 6. Route Polyline
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
@@ -325,9 +308,9 @@ export const LiveMap: React.FC<MapProps> = ({
       }
 
       const polyline = L.polyline(latlngs, {
-        color: '#0ea5e9', // Electric Blue route line
-        weight: 4,
-        opacity: 0.9,
+        color: '#0284c7', // Rich Electric Blue
+        weight: 4.5,
+        opacity: 0.95,
         dashArray: '8, 8',
       }).addTo(map);
 
@@ -351,9 +334,9 @@ export const LiveMap: React.FC<MapProps> = ({
       <div ref={mapContainerRef} className={className} />
 
       {selectionMode && (
-        <div className="absolute top-4 left-4 z-[400] bg-obsidian-900/90 backdrop-blur-md border border-electric-500/50 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold shadow-xl flex items-center space-x-2">
-          <div className="w-2 h-2 rounded-full bg-electric-400 animate-ping" />
-          <span>Click on map to select {selectionMode === 'pickup' ? 'Pickup Spot' : 'Destination'}</span>
+        <div className="absolute top-4 left-4 z-[400] bg-white/95 backdrop-blur-md border border-electric-500 text-navy-900 px-4 py-2 rounded-2xl text-xs font-bold shadow-luxury flex items-center space-x-2">
+          <div className="w-2.5 h-2.5 rounded-full bg-electric-500 animate-ping" />
+          <span>Click map to select {selectionMode === 'pickup' ? 'Pickup Location' : 'Destination'}</span>
         </div>
       )}
     </div>
