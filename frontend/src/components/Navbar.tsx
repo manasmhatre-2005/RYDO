@@ -9,9 +9,7 @@ import {
   LogOut, 
   Radio, 
   ChevronDown, 
-  Sparkles,
-  Compass,
-  DollarSign
+  Sparkles
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -48,7 +46,7 @@ export const Navbar: React.FC = () => {
       default:
         return {
           label: 'Passenger',
-          bg: 'bg-brand-500/10 text-brand-400 border-brand-500/20',
+          bg: 'bg-electric-500/10 text-electric-400 border-electric-500/20',
           icon: <UserIcon className="w-3.5 h-3.5" />
         };
     }
@@ -57,18 +55,18 @@ export const Navbar: React.FC = () => {
   const badge = getRoleBadge(role);
 
   return (
-    <header className="sticky top-0 z-50 bg-dark-900/90 backdrop-blur-md border-b border-slate-800">
+    <header className="sticky top-0 z-50 bg-obsidian-900/90 backdrop-blur-md border-b border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
         {/* Brand Logo & Tagline */}
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-400 flex items-center justify-center shadow-lg shadow-brand-500/20 font-black text-dark-950 text-xl tracking-tighter">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-electric-600 to-electric-400 flex items-center justify-center shadow-lg shadow-electric-500/25 font-black text-obsidian-950 text-xl tracking-tighter">
             R
           </div>
           <div>
             <div className="flex items-center space-x-2">
               <span className="text-xl font-extrabold tracking-tight text-white">RYDO</span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-dark-800 text-slate-400 border border-slate-700">v1.0</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-obsidian-850 text-electric-400 border border-slate-700">3D</span>
             </div>
             <p className="text-[11px] text-slate-400 font-medium hidden sm:block">Move Smarter. Ride Better.</p>
           </div>
@@ -78,10 +76,10 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center space-x-3 sm:space-x-4">
           
           {/* WebSocket Status Indicator */}
-          <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-dark-800/80 border border-slate-700/60 text-xs">
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+          <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-obsidian-850 border border-slate-700/60 text-xs">
+            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-cyan-400 animate-pulse' : 'bg-amber-400'}`} />
             <span className="text-slate-300 font-medium hidden md:inline">
-              {isConnected ? 'Live Network' : 'Connecting'}
+              {isConnected ? 'Telemetry Live' : 'Connecting'}
             </span>
           </div>
 
@@ -96,24 +94,24 @@ export const Navbar: React.FC = () => {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               disabled={isSwitching}
-              className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-all cursor-pointer"
+              className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-obsidian-850 hover:bg-obsidian-800 border border-slate-700 text-xs font-semibold text-slate-200 transition-all cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5 text-brand-400" />
+              <Sparkles className="w-3.5 h-3.5 text-electric-400" />
               <span className="hidden sm:inline">Switch Demo Role</span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </button>
 
             {isMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-dark-800 rounded-xl shadow-2xl border border-slate-700 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute right-0 mt-2 w-56 bg-obsidian-850 rounded-xl shadow-2xl border border-slate-700 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                 <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-700/60 mb-1">
                   1-Click Role Switcher
                 </div>
 
                 <button
                   onClick={() => handleRoleSwitch('passenger')}
-                  className={`w-full text-left px-3 py-2 flex items-center space-x-2.5 hover:bg-dark-700 text-xs font-medium ${role === 'passenger' ? 'text-brand-400 font-bold bg-brand-500/10' : 'text-slate-200'}`}
+                  className={`w-full text-left px-3 py-2 flex items-center space-x-2.5 hover:bg-obsidian-800 text-xs font-medium ${role === 'passenger' ? 'text-electric-400 font-bold bg-electric-500/10' : 'text-slate-200'}`}
                 >
-                  <UserIcon className="w-4 h-4 text-brand-400" />
+                  <UserIcon className="w-4 h-4 text-electric-400" />
                   <div>
                     <div>Passenger View</div>
                     <div className="text-[10px] text-slate-400 font-normal">Alice Smith (Book & Ride)</div>
@@ -122,7 +120,7 @@ export const Navbar: React.FC = () => {
 
                 <button
                   onClick={() => handleRoleSwitch('driver')}
-                  className={`w-full text-left px-3 py-2 flex items-center space-x-2.5 hover:bg-dark-700 text-xs font-medium ${role === 'driver' ? 'text-emerald-400 font-bold bg-emerald-500/10' : 'text-slate-200'}`}
+                  className={`w-full text-left px-3 py-2 flex items-center space-x-2.5 hover:bg-obsidian-800 text-xs font-medium ${role === 'driver' ? 'text-emerald-400 font-bold bg-emerald-500/10' : 'text-slate-200'}`}
                 >
                   <Car className="w-4 h-4 text-emerald-400" />
                   <div>
@@ -133,7 +131,7 @@ export const Navbar: React.FC = () => {
 
                 <button
                   onClick={() => handleRoleSwitch('admin')}
-                  className={`w-full text-left px-3 py-2 flex items-center space-x-2.5 hover:bg-dark-700 text-xs font-medium ${role === 'admin' ? 'text-red-400 font-bold bg-red-500/10' : 'text-slate-200'}`}
+                  className={`w-full text-left px-3 py-2 flex items-center space-x-2.5 hover:bg-obsidian-800 text-xs font-medium ${role === 'admin' ? 'text-red-400 font-bold bg-red-500/10' : 'text-slate-200'}`}
                 >
                   <ShieldCheck className="w-4 h-4 text-red-400" />
                   <div>
@@ -154,7 +152,7 @@ export const Navbar: React.FC = () => {
                 className="w-8 h-8 rounded-full border border-slate-700 object-cover"
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-dark-800 flex items-center justify-center text-xs font-bold text-slate-300">
+              <div className="w-8 h-8 rounded-full bg-obsidian-850 flex items-center justify-center text-xs font-bold text-slate-300">
                 {user?.full_name?.charAt(0) || 'U'}
               </div>
             )}
@@ -162,7 +160,7 @@ export const Navbar: React.FC = () => {
             <button
               onClick={logout}
               title="Log Out"
-              className="p-1.5 rounded-lg hover:bg-dark-800 text-slate-400 hover:text-rose-400 transition"
+              className="p-1.5 rounded-lg hover:bg-obsidian-850 text-slate-400 hover:text-rose-400 transition cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
             </button>

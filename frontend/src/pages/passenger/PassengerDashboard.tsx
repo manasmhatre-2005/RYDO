@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import { apiClient } from '../../api/client';
@@ -21,8 +22,12 @@ import {
   Phone, 
   Sparkles,
   ArrowRight,
-  Car
+  Car,
+  RotateCw
 } from 'lucide-react';
+
+// Lazy load 3D Vehicle component for zero-blocking performance
+const VehiclePreviewCanvas = lazy(() => import('../../components/3d/VehiclePreviewCanvas'));
 
 const PRESET_HUBS = [
   { name: 'Union Square', address: 'Union Square, SF', lat: 37.7879, lng: -122.4074 },
@@ -47,7 +52,7 @@ export const PassengerDashboard: React.FC = () => {
 
   // Fare Estimates
   const [estimates, setEstimates] = useState<FareEstimateResponse | null>(null);
-  const [selectedTier, setSelectedTier] = useState<string>('GO');
+  const [selectedTier, setSelectedTier] = useState<'GO' | 'COMFORT' | 'XL' | 'PREMIUM'>('GO');
   const [estimating, setEstimating] = useState(false);
   const [requestingRide, setRequestingRide] = useState(false);
 
@@ -126,7 +131,7 @@ export const PassengerDashboard: React.FC = () => {
     }
   }, [pickup.lat, pickup.lng, dropoff.lat, dropoff.lng]);
 
-  // 4. Listen to WebSocket events for real-time ride updates
+  // 4. Real-time WebSocket subscriptions
   useEffect(() => {
     const unsubAccepted = subscribe('RIDE_ACCEPTED', (data) => {
       setActiveRide(data.ride);
@@ -220,21 +225,21 @@ export const PassengerDashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       
-      {/* Header Tabs */}
-      <div className="flex items-center justify-between">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center space-x-2">
             <span>Where to, {user?.full_name?.split(' ')[0]}?</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-0.5">Select your pickup & destination to book instantly.</p>
+          <p className="text-xs sm:text-sm text-slate-400 mt-0.5">Move smarter with real-time autonomous routing.</p>
         </div>
 
-        <div className="flex items-center bg-dark-900 border border-slate-800 rounded-2xl p-1">
+        <div className="flex items-center bg-obsidian-900 border border-slate-800 rounded-2xl p-1">
           <button
             onClick={() => setActiveTab('book')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 ${
               activeTab === 'book'
-                ? 'bg-brand-500 text-dark-950 shadow-md shadow-brand-500/20'
+                ? 'bg-electric-500 text-obsidian-950 shadow-md shadow-electric-500/20'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -245,7 +250,7 @@ export const PassengerDashboard: React.FC = () => {
             onClick={() => setActiveTab('history')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 ${
               activeTab === 'history'
-                ? 'bg-brand-500 text-dark-950 shadow-md shadow-brand-500/20'
+                ? 'bg-electric-500 text-obsidian-950 shadow-md shadow-electric-500/20'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -257,9 +262,13 @@ export const PassengerDashboard: React.FC = () => {
 
       {activeTab === 'history' ? (
         /* Ride History View */
-        <div className="bg-dark-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-obsidian-900 border border-slate-800 rounded-3xl p-6 shadow-xl"
+        >
           <h2 className="text-lg font-bold text-white mb-4 flex items-center space-x-2">
-            <History className="w-5 h-5 text-brand-400" />
+            <History className="w-5 h-5 text-electric-400" />
             <span>Your Completed & Past Rides</span>
           </h2>
 
@@ -270,7 +279,7 @@ export const PassengerDashboard: React.FC = () => {
           ) : (
             <div className="space-y-3">
               {rideHistory.map((trip) => (
-                <div key={trip.id} className="p-4 rounded-2xl bg-dark-950 border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div key={trip.id} className="p-4 rounded-2xl bg-obsidian-950 border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
                       <span className="text-xs font-bold text-slate-300">Ride #{trip.id}</span>
@@ -278,7 +287,7 @@ export const PassengerDashboard: React.FC = () => {
                       <span className="text-[11px] text-slate-500">{new Date(trip.created_at).toLocaleDateString()}</span>
                     </div>
                     <div className="text-xs text-slate-300 mt-1 flex items-center space-x-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                      <span className="w-2 h-2 rounded-full bg-electric-400"></span>
                       <span className="font-medium">{trip.pickup_address}</span>
                       <span className="text-slate-500">→</span>
                       <span className="w-2 h-2 rounded-full bg-rose-400"></span>
@@ -293,35 +302,46 @@ export const PassengerDashboard: React.FC = () => {
                     {trip.driver && (
                       <div className="text-right">
                         <div className="text-xs font-bold text-slate-200">{trip.driver.full_name}</div>
-                        <div className="text-[10px] text-slate-400">Driver</div>
+                        <div className="text-[10px] text-slate-400">RYDO Driver</div>
                       </div>
                     )}
                     <div className="text-right">
                       <div className="text-base font-extrabold text-white">${(trip.final_fare || trip.estimated_fare).toFixed(2)}</div>
-                      <div className="text-[10px] text-emerald-400">Paid by Card</div>
+                      <div className="text-[10px] text-electric-400">Settled • Card</div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </motion.div>
       ) : (
-        /* Main Booking & Active Ride Grid */
+        /* Main Interactive Map & Booking Area */
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* Left Column: Interactive Map */}
           <div className="lg:col-span-7 space-y-3">
-            <LiveMap
-              pickup={activeRide ? { lat: activeRide.pickup_lat, lng: activeRide.pickup_lng, address: activeRide.pickup_address } : pickup}
-              dropoff={activeRide ? { lat: activeRide.dropoff_lat, lng: activeRide.dropoff_lng, address: activeRide.dropoff_address } : dropoff}
-              driverLocation={liveDriverPos}
-              selectionMode={selectionMode}
-              onLocationSelect={handleMapLocationSelect}
-              className="h-[480px] w-full rounded-3xl overflow-hidden border border-slate-800 shadow-2xl"
-            />
+            <div className="relative">
+              <LiveMap
+                pickup={activeRide ? { lat: activeRide.pickup_lat, lng: activeRide.pickup_lng, address: activeRide.pickup_address } : pickup}
+                dropoff={activeRide ? { lat: activeRide.dropoff_lat, lng: activeRide.dropoff_lng, address: activeRide.dropoff_address } : dropoff}
+                driverLocation={liveDriverPos}
+                isSearching={activeRide?.status === 'SEARCHING'}
+                selectionMode={selectionMode}
+                onLocationSelect={handleMapLocationSelect}
+                className="h-[520px] w-full rounded-3xl overflow-hidden border border-slate-800 shadow-2xl"
+              />
 
-            {/* Quick Map Presets */}
+              {/* In-Map Telemetry HUD */}
+              <div className="absolute top-4 right-4 z-[400] flex items-center space-x-2">
+                <div className="px-3 py-1.5 rounded-xl bg-obsidian-900/90 backdrop-blur-md border border-slate-700/80 text-[11px] text-slate-300 font-semibold shadow-xl flex items-center space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-electric-400 animate-pulse" />
+                  <span>Interactive Map • 3D Interpolation</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick City Hub Presets */}
             {!activeRide && (
               <div className="flex items-center space-x-2 overflow-x-auto pb-1 text-xs">
                 <span className="text-slate-500 font-semibold uppercase text-[10px] shrink-0">City Presets:</span>
@@ -329,7 +349,7 @@ export const PassengerDashboard: React.FC = () => {
                   <button
                     key={hub.name}
                     onClick={() => setDropoff(hub)}
-                    className="px-3 py-1.5 rounded-full bg-dark-900 hover:bg-dark-800 border border-slate-800 text-slate-300 hover:text-white shrink-0 transition"
+                    className="px-3 py-1.5 rounded-full bg-obsidian-900 hover:bg-obsidian-850 border border-slate-800 text-slate-300 hover:text-white shrink-0 transition cursor-pointer"
                   >
                     📍 {hub.name}
                   </button>
@@ -338,258 +358,265 @@ export const PassengerDashboard: React.FC = () => {
             )}
           </div>
 
-          {/* Right Column: Dynamic Booking Panel or Active Ride Monitor */}
+          {/* Right Column: 3D Vehicle Showcase + Booking / Active Monitor */}
           <div className="lg:col-span-5">
-            {activeRide ? (
-              /* ACTIVE RIDE MONITOR */
-              <div className="bg-dark-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5 animate-in fade-in duration-300">
-                
-                {/* Header status */}
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div>
-                    <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Active Trip #{activeRide.id}</div>
-                    <h3 className="text-lg font-black text-white mt-0.5">
-                      {activeRide.status === 'SEARCHING' && 'Locating Nearby RYDO Driver...'}
-                      {activeRide.status === 'ACCEPTED' && 'Driver is Heading to You!'}
-                      {activeRide.status === 'ARRIVED' && 'Driver Has Arrived at Pickup!'}
-                      {activeRide.status === 'IN_PROGRESS' && 'En Route to Destination'}
-                    </h3>
-                  </div>
-                  <RideStatusBadge status={activeRide.status} />
-                </div>
-
-                {/* Radar Searching Animation if searching */}
-                {activeRide.status === 'SEARCHING' && (
-                  <div className="py-8 flex flex-col items-center justify-center text-center space-y-4">
-                    <div className="relative flex items-center justify-center w-24 h-24">
-                      <div className="absolute inset-0 rounded-full bg-brand-500/20 animate-radar" />
-                      <div className="absolute inset-0 rounded-full bg-brand-500/40 animate-ping" />
-                      <div className="w-14 h-14 rounded-full bg-brand-500 text-dark-950 flex items-center justify-center font-black shadow-lg shadow-brand-500/30">
-                        <Car className="w-7 h-7" />
-                      </div>
-                    </div>
+            <AnimatePresence mode="wait">
+              {activeRide ? (
+                /* ACTIVE RIDE MONITOR */
+                <motion.div
+                  key="active-monitor"
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  className="bg-obsidian-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5"
+                >
+                  {/* Status header */}
+                  <div className="flex items-center justify-between pb-4 border-b border-slate-800">
                     <div>
-                      <h4 className="font-bold text-white text-base">Dispatching request to drivers</h4>
-                      <p className="text-xs text-slate-400 max-w-xs mt-1">
-                        We're matching you with the nearest top-rated driver. This usually takes 10–30 seconds.
+                      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Active Trip #{activeRide.id}</div>
+                      <h3 className="text-base font-black text-white mt-0.5">
+                        {activeRide.status === 'SEARCHING' && 'Finding your nearest RYDO driver...'}
+                        {activeRide.status === 'ACCEPTED' && 'Driver is Heading to You'}
+                        {activeRide.status === 'ARRIVED' && 'Driver Has Arrived at Pickup!'}
+                        {activeRide.status === 'IN_PROGRESS' && 'En Route to Destination'}
+                      </h3>
+                    </div>
+                    <RideStatusBadge status={activeRide.status} />
+                  </div>
+
+                  {/* 3D Vehicle representation in active trip */}
+                  <div className="rounded-2xl overflow-hidden border border-slate-800/80 shadow-inner">
+                    <Suspense fallback={<div className="h-44 w-full bg-obsidian-950 animate-pulse" />}>
+                      <VehiclePreviewCanvas
+                        vehicleType={(activeRide.vehicle_type as any) || 'GO'}
+                        isDriving={activeRide.status === 'IN_PROGRESS'}
+                      />
+                    </Suspense>
+                  </div>
+
+                  {/* Searching pulse banner */}
+                  {activeRide.status === 'SEARCHING' && (
+                    <div className="p-4 rounded-2xl bg-electric-500/10 border border-electric-500/20 text-center space-y-2">
+                      <div className="text-xs font-extrabold text-electric-400">
+                        Dispatching request to nearest available drivers
+                      </div>
+                      <p className="text-[11px] text-slate-400">
+                        Live radar active. You will be paired automatically in seconds.
                       </p>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Driver Card if assigned */}
-                {activeRide.driver && (
-                  <div className="p-4 rounded-2xl bg-dark-950 border border-slate-800/80 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <img
-                          src={activeRide.driver.avatar_url || "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150"}
-                          alt={activeRide.driver.full_name}
-                          className="w-12 h-12 rounded-full border-2 border-brand-400 object-cover"
-                        />
-                        <div>
-                          <h4 className="font-bold text-white text-sm">{activeRide.driver.full_name}</h4>
-                          <div className="flex items-center space-x-2 text-xs text-slate-400">
-                            <span>★ {activeRide.driver_profile?.rating || '5.0'}</span>
-                            <span>•</span>
-                            <span>{activeRide.driver_profile?.total_trips || '100+'} trips</span>
+                  {/* Driver Card */}
+                  {activeRide.driver && (
+                    <div className="p-3.5 rounded-2xl bg-obsidian-950 border border-slate-800/80 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <img
+                            src={activeRide.driver.avatar_url || "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150"}
+                            alt={activeRide.driver.full_name}
+                            className="w-11 h-11 rounded-full border-2 border-electric-400 object-cover"
+                          />
+                          <div>
+                            <h4 className="font-bold text-white text-xs">{activeRide.driver.full_name}</h4>
+                            <div className="flex items-center space-x-2 text-[11px] text-slate-400">
+                              <span className="text-amber-400">★ {activeRide.driver_profile?.rating || '5.0'}</span>
+                              <span>•</span>
+                              <span>{activeRide.driver_profile?.total_trips || '100+'} trips</span>
+                            </div>
                           </div>
                         </div>
+
+                        <a
+                          href={`tel:${activeRide.driver.phone || '+15550192'}`}
+                          className="p-2.5 rounded-xl bg-electric-500/10 text-electric-400 border border-electric-500/30 hover:bg-electric-500 hover:text-obsidian-950 transition"
+                        >
+                          <Phone className="w-4 h-4" />
+                        </a>
                       </div>
 
-                      <a
-                        href={`tel:${activeRide.driver.phone || '+15550192'}`}
-                        className="p-2.5 rounded-xl bg-brand-500/10 text-brand-400 border border-brand-500/30 hover:bg-brand-500 hover:text-dark-950 transition"
-                      >
-                        <Phone className="w-4 h-4" />
-                      </a>
-                    </div>
-
-                    {/* Vehicle Details */}
-                    {activeRide.driver_profile && (
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 text-xs">
-                        <div>
-                          <span className="text-slate-400">Vehicle: </span>
-                          <span className="font-bold text-slate-200">
-                            {activeRide.driver_profile.vehicle_color} {activeRide.driver_profile.vehicle_make} {activeRide.driver_profile.vehicle_model}
-                          </span>
+                      {activeRide.driver_profile && (
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 text-[11px]">
+                          <div>
+                            <span className="text-slate-400">Vehicle: </span>
+                            <span className="font-bold text-slate-200">
+                              {activeRide.driver_profile.vehicle_color} {activeRide.driver_profile.vehicle_make} {activeRide.driver_profile.vehicle_model}
+                            </span>
+                          </div>
+                          <div className="px-2 py-0.5 rounded bg-obsidian-850 text-electric-400 font-mono font-bold tracking-wider">
+                            {activeRide.driver_profile.license_plate}
+                          </div>
                         </div>
-                        <div className="px-2.5 py-1 rounded bg-slate-800 text-brand-400 font-mono font-bold tracking-wider">
-                          {activeRide.driver_profile.license_plate}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* 4-Digit Security PIN (OTP) */}
-                {activeRide.otp_code && activeRide.status !== 'IN_PROGRESS' && (
-                  <div className="p-3.5 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-between">
-                    <div>
-                      <div className="text-[11px] font-bold text-brand-400 uppercase tracking-wider">Security PIN (Share with Driver)</div>
-                      <div className="text-2xl font-black text-white tracking-widest mt-0.5">{activeRide.otp_code}</div>
+                      )}
                     </div>
-                    <Shield className="w-8 h-8 text-brand-400/80" />
-                  </div>
-                )}
-
-                {/* Trip Route Details */}
-                <div className="space-y-2 text-xs">
-                  <div className="flex items-start space-x-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 mt-1 shrink-0" />
-                    <div>
-                      <div className="text-[10px] text-slate-500 uppercase font-semibold">Pickup</div>
-                      <div className="text-slate-200 font-medium">{activeRide.pickup_address}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-rose-400 mt-1 shrink-0" />
-                    <div>
-                      <div className="text-[10px] text-slate-500 uppercase font-semibold">Destination</div>
-                      <div className="text-slate-200 font-medium">{activeRide.dropoff_address}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Fare & Payment Breakdown */}
-                <div className="p-3.5 rounded-2xl bg-dark-950 border border-slate-800/80 flex items-center justify-between">
-                  <div>
-                    <span className="text-xs text-slate-400">Total Estimated Fare</span>
-                    <div className="text-lg font-black text-white">${activeRide.estimated_fare.toFixed(2)}</div>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[10px] text-slate-400">Vehicle Category</span>
-                    <div className="text-xs font-bold text-brand-400">RYDO {activeRide.vehicle_type}</div>
-                  </div>
-                </div>
-
-                {/* Actions: Safety and Cancel */}
-                <div className="flex items-center space-x-3 pt-2">
-                  <button
-                    onClick={() => setShowSafetyModal(true)}
-                    className="flex-1 py-2.5 rounded-xl bg-dark-800 hover:bg-dark-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center justify-center space-x-1.5 transition"
-                  >
-                    <Shield className="w-3.5 h-3.5 text-brand-400" />
-                    <span>Safety Toolkit</span>
-                  </button>
-
-                  {activeRide.status !== 'IN_PROGRESS' && (
-                    <button
-                      onClick={() => setShowCancelModal(true)}
-                      className="px-4 py-2.5 rounded-xl border border-rose-500/30 hover:bg-rose-500/10 text-rose-400 text-xs font-bold transition"
-                    >
-                      Cancel Ride
-                    </button>
                   )}
-                </div>
 
-              </div>
-            ) : (
-              /* BOOKING PANEL */
-              <div className="bg-dark-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5">
-                <div className="space-y-1">
-                  <h3 className="text-lg font-black text-white">Select Locations & Ride</h3>
-                  <p className="text-xs text-slate-400">Transparent pricing. No surge surprises.</p>
-                </div>
+                  {/* 4-Digit Security PIN */}
+                  {activeRide.otp_code && activeRide.status !== 'IN_PROGRESS' && (
+                    <div className="p-3 rounded-2xl bg-electric-500/10 border border-electric-500/30 flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] font-bold text-electric-400 uppercase tracking-wider">Security PIN (Give to Driver)</div>
+                        <div className="text-2xl font-black text-white tracking-widest mt-0.5">{activeRide.otp_code}</div>
+                      </div>
+                      <Shield className="w-7 h-7 text-electric-400/80" />
+                    </div>
+                  )}
 
-                {/* Location Inputs */}
-                <div className="space-y-3">
-                  {/* Pickup */}
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                      Pickup Location
-                    </label>
-                    <div className="relative flex items-center">
-                      <div className="w-3 h-3 rounded-full bg-emerald-400 absolute left-3" />
-                      <input
-                        type="text"
-                        value={pickup.address}
-                        onChange={(e) => setPickup({ ...pickup, address: e.target.value })}
-                        className="w-full bg-dark-950 border border-slate-800 rounded-xl pl-8 pr-20 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setSelectionMode(selectionMode === 'pickup' ? null : 'pickup')}
-                        className={`absolute right-2 px-2 py-1 rounded-lg text-[10px] font-bold border transition ${
-                          selectionMode === 'pickup'
-                            ? 'bg-brand-500 text-dark-950 border-brand-400'
-                            : 'bg-dark-800 text-slate-300 border-slate-700 hover:bg-dark-700'
-                        }`}
-                      >
-                        {selectionMode === 'pickup' ? 'Cancel' : 'Pick on Map'}
-                      </button>
+                  {/* Fare & Route Info */}
+                  <div className="p-3 rounded-2xl bg-obsidian-950 border border-slate-800/80 flex items-center justify-between">
+                    <div>
+                      <span className="text-[11px] text-slate-400">Estimated Fare</span>
+                      <div className="text-lg font-black text-white">${activeRide.estimated_fare.toFixed(2)}</div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] text-slate-400">Vehicle Tier</span>
+                      <div className="text-xs font-bold text-electric-400">RYDO {activeRide.vehicle_type}</div>
                     </div>
                   </div>
 
-                  {/* Dropoff */}
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                      Destination
-                    </label>
-                    <div className="relative flex items-center">
-                      <div className="w-3 h-3 rounded-full bg-rose-400 absolute left-3" />
-                      <input
-                        type="text"
-                        value={dropoff.address}
-                        onChange={(e) => setDropoff({ ...dropoff, address: e.target.value })}
-                        className="w-full bg-dark-950 border border-slate-800 rounded-xl pl-8 pr-20 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setSelectionMode(selectionMode === 'dropoff' ? null : 'dropoff')}
-                        className={`absolute right-2 px-2 py-1 rounded-lg text-[10px] font-bold border transition ${
-                          selectionMode === 'dropoff'
-                            ? 'bg-brand-500 text-dark-950 border-brand-400'
-                            : 'bg-dark-800 text-slate-300 border-slate-700 hover:bg-dark-700'
-                        }`}
-                      >
-                        {selectionMode === 'dropoff' ? 'Cancel' : 'Pick on Map'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                  {/* Actions */}
+                  <div className="flex items-center space-x-3 pt-2">
+                    <button
+                      onClick={() => setShowSafetyModal(true)}
+                      className="flex-1 py-2.5 rounded-xl bg-obsidian-850 hover:bg-obsidian-800 text-slate-200 text-xs font-bold border border-slate-700 flex items-center justify-center space-x-1.5 transition"
+                    >
+                      <Shield className="w-3.5 h-3.5 text-electric-400" />
+                      <span>Safety Toolkit</span>
+                    </button>
 
-                {/* Ride Categories List */}
-                <div className="space-y-2 pt-2">
-                  <div className="flex items-center justify-between text-xs font-bold text-slate-300 uppercase tracking-wider">
-                    <span>Choose Vehicle Class</span>
-                    {estimates && (
-                      <span className="text-slate-400 normal-case font-normal text-[11px]">
-                        {estimates.distance_km} km • {estimates.duration_minutes} min
-                      </span>
+                    {activeRide.status !== 'IN_PROGRESS' && (
+                      <button
+                        onClick={() => setShowCancelModal(true)}
+                        className="px-4 py-2.5 rounded-xl border border-rose-500/30 hover:bg-rose-500/10 text-rose-400 text-xs font-bold transition"
+                      >
+                        Cancel
+                      </button>
                     )}
                   </div>
-
-                  {estimating ? (
-                    <div className="py-8 text-center text-slate-400 text-xs animate-pulse">
-                      Calculating accurate routes & fares...
-                    </div>
-                  ) : estimates?.tiers ? (
-                    <div className="space-y-2">
-                      {estimates.tiers.map((tier) => (
-                        <FareCard
-                          key={tier.vehicle_type}
-                          tier={tier}
-                          isSelected={selectedTier === tier.vehicle_type}
-                          onSelect={() => setSelectedTier(tier.vehicle_type)}
-                        />
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-
-                {/* Confirm & Book Button */}
-                <button
-                  onClick={handleRequestRide}
-                  disabled={requestingRide || !estimates}
-                  className="w-full py-3.5 rounded-2xl bg-brand-500 hover:bg-brand-400 text-dark-950 text-sm font-black transition shadow-lg shadow-brand-500/25 flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
+                </motion.div>
+              ) : (
+                /* BOOKING & 3D VEHICLE SHOWCASE */
+                <motion.div
+                  key="booking-panel"
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  className="bg-obsidian-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4"
                 >
-                  <span>{requestingRide ? 'Contacting Drivers...' : `Request RYDO ${selectedTier}`}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-black text-white">Select Vehicle & Book</h3>
+                      <p className="text-[11px] text-slate-400">Dynamic pricing • Electric 3D fleet</p>
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-electric-500/10 text-electric-400 border border-electric-500/20">
+                      RYDO {selectedTier}
+                    </span>
+                  </div>
 
-              </div>
-            )}
+                  {/* 3D Interactive Vehicle Preview */}
+                  <div className="rounded-2xl overflow-hidden border border-slate-800/80 shadow-inner">
+                    <Suspense fallback={<div className="h-44 w-full bg-obsidian-950 animate-pulse rounded-2xl" />}>
+                      <VehiclePreviewCanvas vehicleType={selectedTier} />
+                    </Suspense>
+                  </div>
+
+                  {/* Location Inputs */}
+                  <div className="space-y-2.5">
+                    {/* Pickup */}
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                        Pickup Spot
+                      </label>
+                      <div className="relative flex items-center">
+                        <div className="w-2.5 h-2.5 rounded-full bg-electric-400 absolute left-3" />
+                        <input
+                          type="text"
+                          value={pickup.address}
+                          onChange={(e) => setPickup({ ...pickup, address: e.target.value })}
+                          className="w-full bg-obsidian-950 border border-slate-800 rounded-xl pl-8 pr-20 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-electric-500 transition"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setSelectionMode(selectionMode === 'pickup' ? null : 'pickup')}
+                          className={`absolute right-2 px-2 py-1 rounded-lg text-[10px] font-bold border transition ${
+                            selectionMode === 'pickup'
+                              ? 'bg-electric-500 text-obsidian-950 border-electric-400'
+                              : 'bg-obsidian-850 text-slate-300 border-slate-700 hover:bg-obsidian-800'
+                          }`}
+                        >
+                          {selectionMode === 'pickup' ? 'Cancel' : 'Pick on Map'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Destination */}
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                        Destination
+                      </label>
+                      <div className="relative flex items-center">
+                        <div className="w-2.5 h-2.5 rounded-full bg-rose-400 absolute left-3" />
+                        <input
+                          type="text"
+                          value={dropoff.address}
+                          onChange={(e) => setDropoff({ ...dropoff, address: e.target.value })}
+                          className="w-full bg-obsidian-950 border border-slate-800 rounded-xl pl-8 pr-20 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-electric-500 transition"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setSelectionMode(selectionMode === 'dropoff' ? null : 'dropoff')}
+                          className={`absolute right-2 px-2 py-1 rounded-lg text-[10px] font-bold border transition ${
+                            selectionMode === 'dropoff'
+                              ? 'bg-electric-500 text-obsidian-950 border-electric-400'
+                              : 'bg-obsidian-850 text-slate-300 border-slate-700 hover:bg-obsidian-800'
+                          }`}
+                        >
+                          {selectionMode === 'dropoff' ? 'Cancel' : 'Pick on Map'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tier Categories List */}
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+                      <span>Select Mobility Tier</span>
+                      {estimates && (
+                        <span className="text-slate-400 normal-case font-normal text-[10px]">
+                          {estimates.distance_km} km • {estimates.duration_minutes} min
+                        </span>
+                      )}
+                    </div>
+
+                    {estimating ? (
+                      <div className="py-6 text-center text-slate-400 text-xs animate-pulse">
+                        Calculating optimal route & fares...
+                      </div>
+                    ) : estimates?.tiers ? (
+                      <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                        {estimates.tiers.map((tier) => (
+                          <FareCard
+                            key={tier.vehicle_type}
+                            tier={tier}
+                            isSelected={selectedTier === tier.vehicle_type}
+                            onSelect={() => setSelectedTier(tier.vehicle_type as any)}
+                          />
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {/* Confirm & Book Button */}
+                  <button
+                    onClick={handleRequestRide}
+                    disabled={requestingRide || !estimates}
+                    className="w-full py-3.5 rounded-2xl bg-electric-500 hover:bg-electric-400 text-obsidian-950 text-xs sm:text-sm font-black transition shadow-lg shadow-electric-500/25 flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
+                  >
+                    <span>{requestingRide ? 'Finding your nearest RYDO driver...' : `Request RYDO ${selectedTier}`}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
         </div>
@@ -614,15 +641,15 @@ export const PassengerDashboard: React.FC = () => {
 
       {/* Cancellation Modal */}
       {showCancelModal && (
-        <div className="fixed inset-0 z-50 bg-dark-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-dark-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-obsidian-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-obsidian-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
             <h3 className="font-extrabold text-white text-base">Cancel Ride?</h3>
-            <p className="text-xs text-slate-400">Please select a reason so we can improve our driver network:</p>
+            <p className="text-xs text-slate-400">Please choose a reason:</p>
             
             <select
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
-              className="w-full bg-dark-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white"
+              className="w-full bg-obsidian-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white"
             >
               <option value="Change of plans">Change of plans</option>
               <option value="Driver is taking too long">Driver is taking too long</option>
@@ -633,7 +660,7 @@ export const PassengerDashboard: React.FC = () => {
             <div className="flex items-center space-x-3 pt-2">
               <button
                 onClick={() => setShowCancelModal(false)}
-                className="w-1/2 py-2 rounded-xl bg-dark-800 text-slate-300 text-xs font-semibold hover:bg-dark-700"
+                className="w-1/2 py-2 rounded-xl bg-obsidian-850 text-slate-300 text-xs font-semibold hover:bg-obsidian-800"
               >
                 Keep Ride
               </button>
