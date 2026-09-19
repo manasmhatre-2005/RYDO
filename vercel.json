@@ -1,27 +1,43 @@
 {
-  "version": 2,
-  "buildCommand": "cd frontend && npm install && npm run build",
-  "outputDirectory": "frontend/dist",
+  "services": {
+    "rydo-frontend": {
+      "root": "frontend"
+    },
+    "rydo-api": {
+      "root": "backend",
+      "entrypoint": "main.py"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.py"
+      "destination": {
+        "service": "rydo-api"
+      }
     },
     {
       "source": "/health",
-      "destination": "/api/index.py"
+      "destination": {
+        "service": "rydo-api"
+      }
     },
     {
       "source": "/docs",
-      "destination": "/api/index.py"
+      "destination": {
+        "service": "rydo-api"
+      }
     },
     {
       "source": "/openapi.json",
-      "destination": "/api/index.py"
+      "destination": {
+        "service": "rydo-api"
+      }
     },
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": {
+        "service": "rydo-frontend"
+      }
     }
   ]
 }
