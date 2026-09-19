@@ -24,7 +24,10 @@ export const WS_BASE_URL = (() => {
   }
   const loc = window.location;
   const wsProto = loc.protocol === 'https:' ? 'wss://' : 'ws://';
-  return `${wsProto}${loc.hostname}:8000`;
+  if (loc.hostname === 'localhost' || loc.hostname === '127.0.0.1') {
+    return `${wsProto}${loc.hostname}:8000`;
+  }
+  return `${wsProto}${loc.host}`;
 })();
 
 export const apiClient = axios.create({

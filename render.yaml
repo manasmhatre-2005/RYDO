@@ -1,6 +1,6 @@
 services:
   # -------------------------------------------------------------
-  # RYDO BACKEND API (FastAPI + WebSockets + SQLAlchemy)
+  # RYDO BACKEND API (FastAPI + WebSockets + SQLAlchemy + PostgreSQL)
   # -------------------------------------------------------------
   - type: web
     name: rydo-api
@@ -26,9 +26,19 @@ services:
         value: "*"
       - key: ENVIRONMENT
         value: production
+      - key: CURRENCY
+        value: INR
+      - key: CURRENCY_SYMBOL
+        value: "₹"
+      - key: CURRENCY_LOCALE
+        value: en-IN
+      - key: AI_PROVIDER
+        value: builtin
+      - key: AI_MODEL
+        value: rydo-mobility-v1
 
   # -------------------------------------------------------------
-  # RYDO FRONTEND (React + Vite + Tailwind + Leaflet)
+  # RYDO FRONTEND (React + Vite + Tailwind + Leaflet + Three.js)
   # -------------------------------------------------------------
   - type: web
     name: rydo-frontend
