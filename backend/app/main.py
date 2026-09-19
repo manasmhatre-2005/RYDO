@@ -55,7 +55,7 @@ if isinstance(origins, str):
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_origin_regex=r"https://.*\.onrender\.com",
+    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.onrender\.com",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -72,6 +72,7 @@ app.include_router(notifications_router, prefix=settings.API_V1_STR)
 app.include_router(ws_router)
 
 @app.get("/health", tags=["Health"])
+@app.get("/api/health", tags=["Health"])
 def health_check():
     return {
         "status": "healthy",

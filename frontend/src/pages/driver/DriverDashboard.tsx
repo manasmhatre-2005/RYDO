@@ -116,6 +116,17 @@ export const DriverDashboard: React.FC<DriverDashboardProps> = ({
     };
   }, [isOnline, activeRide, subscribe]);
 
+  // Polling fallback when driver is online (especially for serverless deployment)
+  useEffect(() => {
+    if (!isOnline) return;
+    const interval = setInterval(() => {
+      if (!activeRide) {
+        fetchOffers();
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isOnline, activeRide]);
+
   // Toggle Online/Offline
   const handleToggleOnline = async () => {
     const nextState = !isOnline;

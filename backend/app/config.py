@@ -52,6 +52,17 @@ class Settings(BaseSettings):
     @property
     def sqlalchemy_database_url(self) -> str:
         url = self.DATABASE_URL
+        if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+            tmp_db = "/tmp/rydo.db"
+            if not os.path.exists(tmp_db):
+                seed_db = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "rydo.db")
+                if os.path.exists(seed_db):
+                    try:
+                        import shutil
+                        shutil.copyfile(seed_db, tmp_db)
+                    except Exception:
+                        pass
+            return f"sqlite:///{tmp_db}"
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql://", 1)
         return url

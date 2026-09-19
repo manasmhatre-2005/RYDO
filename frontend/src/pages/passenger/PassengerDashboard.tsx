@@ -153,6 +153,17 @@ export const PassengerDashboard: React.FC<PassengerDashboardProps> = ({
     }
   }, [pickup.lat, pickup.lng, dropoff.lat, dropoff.lng]);
 
+  // Polling fallback for active ride updates (especially for serverless deployment)
+  useEffect(() => {
+    if (!activeRide || activeRide.status === 'COMPLETED' || activeRide.status === 'CANCELLED') {
+      return;
+    }
+    const interval = setInterval(() => {
+      fetchActiveRide();
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [activeRide?.id, activeRide?.status]);
+
   // 4. Real-time WebSocket subscriptions
   useEffect(() => {
     const unsubAccepted = subscribe('RIDE_ACCEPTED', (data) => {
